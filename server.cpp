@@ -153,7 +153,8 @@ void Server::handleNewConnection()
     pollfds.push_back(clientPollfd);
 
     // Add client to clients
-    struct client newClient = {clientSocket, ""};
+    // here mberri : replace struct with class 
+    client newClient(clientSocket, this->password);
     clients[clientSocket] = newClient;
 
     // Send welcome message
