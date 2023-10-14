@@ -48,12 +48,12 @@ void Server::run()
     }
 
     // allow socket to be reuseable
-    // int opt = 1;
-    // if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-    //     std::cerr << "Error setting socket options" << std::endl;
-    //     close(serverSocket);
-    //     exit(EXIT_FAILURE);
-    // }
+    int opt = 1;
+    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        std::cerr << "Error setting socket options" << std::endl;
+        close(serverSocket);
+        exit(EXIT_FAILURE);
+    }
 
     // Set socket to non-blocking
     if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) < 0)
@@ -168,6 +168,7 @@ void Server::handleNewConnection()
 
 void Server::handelClientMessage(int clientSocket)
 {
+    Command::fillListOfCommands();
     char buffer[Server::BUFFER_SIZE];
     memset(buffer, 0, sizeof(buffer));
     int messageSize = recv(clientSocket, buffer, sizeof(buffer), 0);
@@ -181,7 +182,8 @@ void Server::handelClientMessage(int clientSocket)
     else
     {
         std::string message(buffer);
-        std::cout << "Message from client: " << message << std::endl;
+        Command command(message);
+        command.execute();
     }
 }
 

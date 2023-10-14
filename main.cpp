@@ -14,5 +14,6 @@ int main(int argc, char *argv[])
     }
     Server server(strtoll(argv[1], NULL, 10), argv[2]);
     server.run();
+
     return 0;
 }

@@ -16,6 +16,8 @@
 #include <fcntl.h>
 #include <sstream>
 
+#include "command.hpp"
+
 struct client {
     int socket;
     std::string name;
