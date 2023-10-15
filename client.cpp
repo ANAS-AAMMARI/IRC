@@ -1,10 +1,29 @@
 #include "client.hpp"
 
+Client::Client() {
+    this->isRegistered = false;
+}
+
+bool Client::getIsRegistered() {
+    return this->isRegistered;
+}
+
+void Client::setIsRegistered(bool isRegistered) {
+    this->isRegistered = isRegistered;
+}
+
+Client::Client(int socket, std::string password) {
+    this->socket = socket;
+    this->password = password;
+    this->isRegistered = false;
+}
+
 Client::Client(std::string nick, std::string user, int socket, std::string password) {
     this->nick = nick;
     this->user = user;
     this->socket = socket;
     this->password = password;
+    this->isRegistered = false;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -13,6 +32,7 @@ Client& Client::operator=(const Client& other) {
         this->user = other.user;
         this->socket = other.socket;
         this->password = other.password;
+        this->isRegistered = other.isRegistered;
     }
     return *this;
 }

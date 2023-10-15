@@ -7,6 +7,9 @@
 #include <sstream>
 #include <algorithm>
 
+#include "server.hpp"
+#include "client.hpp"
+
 enum Commands{
     PASS,
     NICK,
@@ -20,7 +23,6 @@ enum Commands{
     INVITE,
 };
 
-
 class Command {
 private:
     std::string msg;
@@ -29,7 +31,7 @@ private:
     std::vector<std::string> args;
 public:
     static std::vector<std::string> listOfCommands;
-    Command(std::string msg);
+    Command(std::string msg, Client &client);
     Command& operator=(const Command& other);
     Command(const Command& other);
     ~Command();
@@ -39,13 +41,13 @@ public:
     void setMsg(std::string msg);
     int getIndexOfCommand();
     void setIndexOfCommand(int index);
-    void parse();
-    void execute();
+    void parse(int socket);
+    void execute(Client &client);
     void trimString(std::string &str);
     static void fillListOfCommands();
     void toUpper(std::string &str);
     // void sendToClient(std::string msg, int clientSocket);
-    void Password();
+    void Password(Client &client);
     void Nick();
     void User();
 

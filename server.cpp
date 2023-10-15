@@ -117,7 +117,7 @@ void Server::run()
                 handleClientDisconnection(pollfds[i].fd);
             else if (pollfds[i].revents & POLLIN)
             {
-                std::cout << "Client event " << pollfds[i].revents << std::endl;
+                //std::cout << "Client event " << pollfds[i].revents << std::endl;
                 handelClientMessage(pollfds[i].fd);
             }
         }
@@ -153,11 +153,11 @@ void Server::handleNewConnection()
     pollfds.push_back(clientPollfd);
 
     // Add client to clients
-    struct client newClient = {clientSocket, ""};
+    Client newClient(clientSocket, this->password);
     clients[clientSocket] = newClient;
 
     // Send welcome message
-    std::string welcomeMessage = "Welcome to the chat server!\n";
+    std::string welcomeMessage = "Welcome to the chat server, you are client number : " + std::to_string(newClient.getSocket() - 3) + "\n";
     if (send(clientSocket, welcomeMessage.c_str(), welcomeMessage.size(), 0) < 0)
     {
         std::cerr << "Error sending welcome message" << std::endl;
@@ -182,15 +182,15 @@ void Server::handelClientMessage(int clientSocket)
     else
     {
         std::string message(buffer);
-        Command command(message);
-        command.execute();
+        Command command(message, clients[clientSocket]);
+        command.execute(clients[clientSocket]);
     }
 }
 
 void Server::handleClientDisconnection(int clientSocket)
 {
 
-    std::cout << "Client disconnected" << std::endl;
+    std::cout << "Client Number "<< clientSocket - 3 << " disconnected"<< std::endl;
     // Close client socket
     close(clientSocket);
 

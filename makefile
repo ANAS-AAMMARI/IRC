@@ -5,11 +5,13 @@ CPP = c++
 CPPFLAGS=-Wall -Wextra -Werror -std=c++98
 
 HEADER=	command.hpp \
-		server.hpp 
+		server.hpp 	\
+		client.hpp
 
 SRC=	main.cpp \
 		command.cpp \
-		server.cpp
+		server.cpp	\
+		client.cpp
 
 OBJ=$(SRC:.cpp=.o)
 

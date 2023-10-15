@@ -7,9 +7,12 @@ int main(int argc, char *argv[])
         std::cerr << "Usage: " << argv[0] << " <port> <password>" << std::endl;
         exit(EXIT_FAILURE);
     }
-    if (!isNumber(argv[1]))
+    if (!isNumber(argv[1]) || strlen(argv[2]) == 0)
     {
-        std::cerr << "Invalid port number" << std::endl;
+        if (!isNumber(argv[1]))
+            std::cerr << "Invalid port number" << std::endl;
+        else
+            std::cerr << "password cannot be empty" << std::endl;
         exit(EXIT_FAILURE);
     }
     Server server(strtoll(argv[1], NULL, 10), argv[2]);

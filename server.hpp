@@ -16,13 +16,13 @@
 #include <fcntl.h>
 #include <sstream>
 
+#include "client.hpp"
 #include "command.hpp"
 
-struct client {
+/*struct client {
     int socket;
     std::string name;
-};
-
+};*/
 
 class Server {
 private:
@@ -30,7 +30,7 @@ private:
     std::string password;
     static const int BUFFER_SIZE;
     std::vector<struct pollfd> pollfds;
-    std::map<int, client> clients;
+    std::map<int, Client> clients;
     void handleNewConnection();
     void handelClientMessage(int clientSocket);
     void handleClientDisconnection(int clientSocket);
