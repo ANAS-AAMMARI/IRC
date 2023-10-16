@@ -2,6 +2,10 @@
 
 std::vector<std::string> Command::listOfCommands;
 
+void    Command::sendToClient(std::string msg, int clientSocket) {
+    send(clientSocket, msg.c_str(), msg.size(), 0);
+}
+
 void Command::fillListOfCommands() {
     Command::listOfCommands.push_back("PASS");
     Command::listOfCommands.push_back("NICK");
@@ -86,9 +90,6 @@ void Command::parse(int socket)
     std::stringstream ss(this->msg);
     std::getline(ss, temp, ' ');
     this->toUpper(temp);
-
-    //std::cout << temp << std::endl;
-
     for(size_t i = 0; i < Command::listOfCommands.size(); i++) {
         if (temp == Command::listOfCommands[i]) {
             this->command = temp;
@@ -97,12 +98,12 @@ void Command::parse(int socket)
         }
     }
     if (this->indexOfCommand == -1) {
-        std::string message = "Invalid command\n";
+        std::string message = "Unknown command\n";
         send(socket, message.c_str(), message.size(), 0);
         return;
     }
     if (this->msg.find(':') != std::string::npos) {
-        /*std::getline(ss, temp, ':');
+        std::getline(ss, temp, ':');
         this->trimString(temp);
         std::stringstream ss2(temp);
         while (std::getline(ss2, temp, ' ')) {
@@ -111,53 +112,74 @@ void Command::parse(int socket)
         }
         std::getline(ss, temp);
         this->trimString(temp);
-        this->args.push_back(temp);*/
-    std::istringstream ss(this->msg);
-    std::string temp;
-    std::getline(ss, temp, ':');
-    while (std::getline(ss, temp, ':')) {
-        this->trimString(temp); // Assuming trimString is a valid function to remove extra spaces
-        std::istringstream ss2(temp);
-        std::string word;
-        while (std::getline(ss2, word, ' ')) {
-            this->trimString(word); // Assuming trimString is a valid function to remove extra spaces
-            this->args.push_back(word);
-            }
+        this->args.push_back(temp);
+    }
+    else{
+        while (std::getline(ss, temp, ' ')) {
+            this->trimString(temp);
+            this->args.push_back(temp);
         }
     }
 }
 
 void Command::Password(Client &client) {
-    std::string message;
-    if (client.getIsRegistered() == true)
+    if (client.getIsRegisteredPWD() == true)
     {
-        message = "You are already registered and logged in\n";
-        send(client.getSocket(), message.c_str(), message.size(), 0);
+        if (client.getCheck() >= 3) {
+            sendToClient("You are already registered\n", client.getSocket());
+            return;
+        }
+        sendToClient("password already registered\n", client.getSocket());
         return;
     }
     if (args.size() != 1) {
-        message = "Wrong number of arguments(invalid password)\n";
-        send(client.getSocket(), message.c_str(), message.size(), 0);
+        sendToClient("Wrong number of arguments\n", client.getSocket());
         return;
     }
     if (args[0] != client.getPassword()) {
-        message = "Wrong password\n";
-        send(client.getSocket(), message.c_str(), message.size(), 0);
+        sendToClient("Wrong password\n", client.getSocket());
         return;
     }
     if (args[0] == client.getPassword()) {
-        message = "You are now registered and logged in, Welcomee\n";
-        send(client.getSocket(), message.c_str(), message.size(), 0);
-        client.setIsRegistered(true);
+        sendToClient("Password accepted\n", client.getSocket());
+        client.setIsRegisteredPWD(true);
+        client.increaseCheck();
     }
 }
 
-void Command::Nick() {
-    std::cout << "Nick" << std::endl;
+void Command::Nick(Client &client) {
+    if (client.getIsRegisteredPWD() == false){
+        sendToClient("Password not registered\n", client.getSocket());
+        return;
+    }
+    if (args.size() != 1) {
+        sendToClient("Wrong number of arguments\n", client.getSocket());
+        return;
+    }
+    client.setNick(args[0]);
+    client.increaseCheck();
 }
 
-void Command::User() {
-    std::cout << "User" << std::endl;
+void Command::User(Client &client) {
+    if (client.getIsRegisteredPWD() == false){
+        sendToClient("Password not registered\n", client.getSocket());
+        return;
+    }
+    if (client.getIsRegisteredUSER()) {
+        if (client.getCheck() >= 3) {
+            sendToClient("You are already registered\n", client.getSocket());
+            return;
+        }
+        sendToClient("User already registered\n", client.getSocket());
+        return;
+    }
+    if (args.size() != 1) {
+        sendToClient("Wrong number of arguments\n", client.getSocket());
+        return;
+    }
+    client.setUser(args[0]);
+    client.setIsRegisteredUSER(true);
+    client.increaseCheck();
 }
 
 
@@ -168,15 +190,29 @@ void Command::execute(Client &client)
             this->Password(client);
             break;
         case 1:
-            this->Nick();
+            this->Nick(client);
             break;
         case 2:
-            this->User();
+            this->User(client);
             break;
         default:
             break; 
     }
-    /*void (Command::*commands[])() = {&Command::Password, &Command::Nick, &Command::User};
-    if (this->indexOfCommand != -1)
-        (this->*commands[this->indexOfCommand])();*/
 }
+
+
+
+
+// parse function args part
+/*std::istringstream ss(this->msg);
+            std::string temp;
+            std::getline(ss, temp, ':');
+            while (std::getline(ss, temp, ':')) {
+            this->trimString(temp); // Assuming trimString is a valid function to remove extra spaces
+            std::istringstream ss2(temp);
+            std::string word;
+            while (std::getline(ss2, word, ' ')) {
+            this->trimString(word); // Assuming trimString is a valid function to remove extra spaces
+            this->args.push_back(word);
+                }
+        }*/

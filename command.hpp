@@ -46,10 +46,10 @@ public:
     void trimString(std::string &str);
     static void fillListOfCommands();
     void toUpper(std::string &str);
-    // void sendToClient(std::string msg, int clientSocket);
+    void sendToClient(std::string msg, int clientSocket);
     void Password(Client &client);
-    void Nick();
-    void User();
+    void Nick(Client &client);
+    void User(Client &client);
 
 };
 

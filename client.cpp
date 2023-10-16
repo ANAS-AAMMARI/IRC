@@ -2,10 +2,36 @@
 
 Client::Client() {
     this->isRegistered = false;
+    this->isRegisteredPWD = false;
+    this->isRegisteredUSER = false;
+    this->check = 0;
 }
 
+int Client::getCheck() {
+    return this->check;
+}
+
+void Client::increaseCheck() {
+    this->check++;
+}
 bool Client::getIsRegistered() {
     return this->isRegistered;
+}
+
+bool Client::getIsRegisteredPWD() {
+    return this->isRegisteredPWD;
+}
+
+bool Client::getIsRegisteredUSER() {
+    return this->isRegisteredUSER;
+}
+
+void Client::setIsRegisteredPWD(bool isRegisteredPWD) {
+    this->isRegisteredPWD = isRegisteredPWD;
+}
+
+void Client::setIsRegisteredUSER(bool isRegisteredUSER) {
+    this->isRegisteredUSER = isRegisteredUSER;
 }
 
 void Client::setIsRegistered(bool isRegistered) {
