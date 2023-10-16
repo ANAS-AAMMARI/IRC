@@ -19,11 +19,11 @@ void Command::fillListOfCommands() {
     Command::listOfCommands.push_back("INVITE");
 }
 
-Command::Command(std::string msg, Client &client) {
+Command::Command(std::string msg, std::map<int, Client> &client, int index) {
     this->msg = msg;
     this->command = "";
     this->indexOfCommand = -1;
-    this->parse(client.getSocket());
+    this->parse(client[index].getSocket());
 }
 
 Command& Command::operator=(const Command& other) {
@@ -122,85 +122,114 @@ void Command::parse(int socket)
     }
 }
 
-void Command::Password(Client &client) {
-    if (client.getIsRegisteredPWD() == true)
+void Command::Password(std::map<int, Client> &client, int index) {
+    if (client[index].getIsRegisteredPWD() == true)
     {
-        if (client.getCheck() >= 3) {
-            sendToClient("You are already registered\n", client.getSocket());
+        if (client[index].getCheck() >= 3) {
+            sendToClient("You are already registered\n", client[index].getSocket());
             return;
         }
-        sendToClient("password already registered\n", client.getSocket());
+        sendToClient("password already registered\n", client[index].getSocket());
         return;
     }
     if (args.size() != 1) {
-        sendToClient("Wrong number of arguments\n", client.getSocket());
+        sendToClient("Wrong number of arguments\n", client[index].getSocket());
         return;
     }
-    if (args[0] != client.getPassword()) {
-        sendToClient("Wrong password\n", client.getSocket());
+    if (args[0] != client[index].getPassword()) {
+        sendToClient("Wrong password\n", client[index].getSocket());
         return;
     }
-    if (args[0] == client.getPassword()) {
-        sendToClient("Password accepted\n", client.getSocket());
-        client.setIsRegisteredPWD(true);
-        client.increaseCheck();
+    if (args[0] == client[index].getPassword()) {
+        sendToClient("Password accepted\n", client[index].getSocket());
+        client[index].setIsRegisteredPWD(true);
+        client[index].increaseCheck();
     }
 }
 
-void Command::Nick(Client &client) {
-    if (client.getIsRegisteredPWD() == false){
-        sendToClient("Password not registered\n", client.getSocket());
+void Command::Nick(std::map<int, Client> &client, int index) {
+    if (client[index].getIsRegisteredPWD() == false){
+        sendToClient("Password not registered\n", client[index].getSocket());
         return;
     }
     if (args.size() != 1) {
-        sendToClient("Wrong number of arguments\n", client.getSocket());
+        sendToClient("Wrong number of arguments\n", client[index].getSocket());
         return;
     }
-    client.setNick(args[0]);
-    client.increaseCheck();
+    if (!checkUsrNick(client, 1, args[0])) {
+        sendToClient("Nickname already registered, (used by another client)\n", client[index].getSocket());
+        return;
+    }
+    client[index].setNick(args[0]);
+    client[index].increaseCheck();
 }
 
-void Command::User(Client &client) {
-    if (client.getIsRegisteredPWD() == false){
-        sendToClient("Password not registered\n", client.getSocket());
+void Command::User(std::map<int, Client> &client, int index) {
+    if (client[index].getIsRegisteredPWD() == false){
+        sendToClient("Password not registered\n", client[index].getSocket());
         return;
     }
-    if (client.getIsRegisteredUSER()) {
-        if (client.getCheck() >= 3) {
-            sendToClient("You are already registered\n", client.getSocket());
+    if (client[index].getIsRegisteredUSER()) {
+        if (client[index].getCheck() >= 3) {
+            sendToClient("You are already registered\n", client[index].getSocket());
             return;
         }
-        sendToClient("User already registered\n", client.getSocket());
+        sendToClient("User already registered\n", client[index].getSocket());
         return;
     }
     if (args.size() != 1) {
-        sendToClient("Wrong number of arguments\n", client.getSocket());
+        sendToClient("Wrong number of arguments\n", client[index].getSocket());
         return;
     }
-    client.setUser(args[0]);
-    client.setIsRegisteredUSER(true);
-    client.increaseCheck();
+    if (!checkUsrNick(client, 2, args[0])) {
+        sendToClient("Username already registered, (used by another client)\n", client[index].getSocket());
+        return;
+    }
+    client[index].setUser(args[0]);
+    client[index].setIsRegisteredUSER(true);
+    client[index].increaseCheck();
 }
 
 
-void Command::execute(Client &client)
+void Command::execute(std::map<int, Client> &client, int index)
 {
     switch (this->indexOfCommand) {
         case 0:
-            this->Password(client);
+            this->Password(client, index);
             break;
         case 1:
-            this->Nick(client);
+            this->Nick(client, index);
             break;
         case 2:
-            this->User(client);
+            this->User(client, index);
             break;
         default:
             break; 
     }
 }
 
-
+int Command::checkUsrNick(std::map<int , Client> &client, int check, std::string str)
+{
+    if (check == 1)
+    {
+        std::map<int, Client>::iterator it;
+        for (it = client.begin(); it != client.end(); ++it)
+        {
+            if (it->second.getNick() == str)
+                return 0;
+        }
+    }
+    if (check == 2)
+    {
+        std::map<int, Client>::iterator it;
+        for (it = client.begin(); it != client.end(); ++it)
+        {
+            if (it->second.getUser() == str)
+                return 0;
+        }
+    }
+    return 1;
+}
 
 
 // parse function args part

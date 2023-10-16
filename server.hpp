@@ -19,11 +19,6 @@
 #include "client.hpp"
 #include "command.hpp"
 
-/*struct client {
-    int socket;
-    std::string name;
-};*/
-
 class Server {
 private:
     long long port;

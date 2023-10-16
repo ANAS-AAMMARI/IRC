@@ -182,8 +182,8 @@ void Server::handelClientMessage(int clientSocket)
     else
     {
         std::string message(buffer);
-        Command command(message, clients[clientSocket]);
-        command.execute(clients[clientSocket]);
+        Command command(message, clients, clientSocket);
+        command.execute(clients, clientSocket);
     }
 }
 
@@ -203,7 +203,6 @@ void Server::handleClientDisconnection(int clientSocket)
             break;
         }
     }
-
     // Remove client from clients
     clients.erase(clientSocket);
 }
