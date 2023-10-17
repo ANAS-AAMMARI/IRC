@@ -6,7 +6,8 @@ CPPFLAGS=-Wall -Wextra -Werror -std=c++98
 
 HEADER=	command.hpp \
 		server.hpp 	\
-		client.hpp
+		client.hpp	\
+		tools.hpp
 
 SRC=	main.cpp \
 		command.cpp \
