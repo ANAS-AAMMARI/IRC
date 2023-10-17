@@ -177,8 +177,8 @@ void Command::User(std::map<int, Client> &client, int index) {
         sendToClient("User already registered\n", client[index].getSocket());
         return;
     }
-    if (args.size() != 1) {
-        sendToClient("Wrong number of arguments\n", client[index].getSocket());
+    if (args.size() < 4) {
+        sendToClient("Wrong number of arguments ( you need at least 4)\n", client[index].getSocket());
         return;
     }
     if (!checkUsrNick(client, 2, args[0])) {
