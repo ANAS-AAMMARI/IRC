@@ -2,7 +2,7 @@
 
 std::vector<std::string> Command::listOfCommands;
 
-void    Command::sendToClient(std::string msg, int clientSocket) {
+void    Command::sendToClient(const std::string &msg, int clientSocket) {
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 
@@ -23,7 +23,7 @@ Command::Command(std::string msg, std::map<int, Client> &client, int index) {
     this->msg = msg;
     this->command = "";
     this->indexOfCommand = -1;
-    this->parse(client[index].getSocket());
+    this->parse(client[index]);
 }
 
 Command& Command::operator=(const Command& other) {
@@ -83,7 +83,7 @@ void Command::toUpper(std::string &str) {
     std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 }
 
-void Command::parse(int socket)
+void Command::parse(Client &client)
 {
     std::string temp;
     this->trimString(this->msg);
@@ -97,9 +97,8 @@ void Command::parse(int socket)
             break;
         }
     }
-    if (this->indexOfCommand == -1) {
-        std::string message = "Unknown command\n";
-        send(socket, message.c_str(), message.size(), 0);
+    if (this->indexOfCommand == -1 && client.getCheck() >= 3) {
+        sendToClient(UNKNOWN_COMMAND_MSG(this->msg), client.getSocket());
         return;
     }
     if (this->msg.find(':') != std::string::npos) {
@@ -120,6 +119,23 @@ void Command::parse(int socket)
             this->args.push_back(temp);
         }
     }
+}
+
+void    Command::Privmsg(std::map<int, Client> &client, int index) {
+    if (args.size() < 0) {
+        sendToClient("Wrong number of arguments\n", client[index].getSocket());
+        return;
+    }
+    int j = 0;
+    if (args.size() >= 1)
+        int j = checkUsrNick(client, 3, args[0], index);
+    if (j != 0) {
+        std::string message = "You received this message: " + args[1] + "from , " + client[index].getNick() + "\n";
+        sendToClient(message, j);
+        return;
+    }
+    //std::cout << "Here is the message: " << args[1] << std::endl;
+    //sendToClient("PRIVMSG " + args[0] + " :" + args[1] + "\n", client[index].getSocket());
 }
 
 void Command::Password(std::map<int, Client> &client, int index) {
@@ -156,12 +172,16 @@ void Command::Nick(std::map<int, Client> &client, int index) {
         sendToClient("Wrong number of arguments\n", client[index].getSocket());
         return;
     }
-    if (!checkUsrNick(client, 1, args[0])) {
+    if (!checkUsrNick(client, 1, args[0], index)) {
         sendToClient("Nickname already registered, (used by another client)\n", client[index].getSocket());
         return;
     }
-    client[index].setNick(args[0]);
-    client[index].increaseCheck();
+    if (client[index].getCheck() == 2)
+    {
+        client[index].setNick(args[0]);
+        client[index].increaseCheck();
+        sendToClient("Welcone to IRC server " + args[0] + "\n", client[index].getSocket());
+    }
 }
 
 void Command::User(std::map<int, Client> &client, int index) {
@@ -181,13 +201,17 @@ void Command::User(std::map<int, Client> &client, int index) {
         sendToClient("Wrong number of arguments ( you need at least 4)\n", client[index].getSocket());
         return;
     }
-    if (!checkUsrNick(client, 2, args[0])) {
+    /*if (!checkUsrNick(client, 2, args[0], index)) {
         sendToClient("Username already registered, (used by another client)\n", client[index].getSocket());
         return;
+    }*/
+    if (client[index].getCheck() == 2)
+    {
+        client[index].setUser(args[0]);
+        client[index].setIsRegisteredUSER(true);
+        client[index].increaseCheck();
+        sendToClient("Welcone to IRC server " + client[index].getNick() + "\n", client[index].getSocket());
     }
-    client[index].setUser(args[0]);
-    client[index].setIsRegisteredUSER(true);
-    client[index].increaseCheck();
 }
 
 
@@ -203,12 +227,14 @@ void Command::execute(std::map<int, Client> &client, int index)
         case 2:
             this->User(client, index);
             break;
+        case 3:
+            this->Privmsg(client, index);
         default:
             break; 
     }
 }
 
-int Command::checkUsrNick(std::map<int , Client> &client, int check, std::string str)
+int Command::checkUsrNick(std::map<int , Client> &client, int check, std::string str, int index)
 {
     if (check == 1)
     {
@@ -219,7 +245,7 @@ int Command::checkUsrNick(std::map<int , Client> &client, int check, std::string
                 return 0;
         }
     }
-    if (check == 2)
+    /*if (check == 2)
     {
         std::map<int, Client>::iterator it;
         for (it = client.begin(); it != client.end(); ++it)
@@ -227,6 +253,23 @@ int Command::checkUsrNick(std::map<int , Client> &client, int check, std::string
             if (it->second.getUser() == str)
                 return 0;
         }
+    }*/
+    if (check == 3)
+    {
+        std::map<int, Client>::iterator it;
+        int i = 4;
+        for (it = client.begin(); it != client.end(); ++it)
+        {
+            if (i == index)
+            {
+                i++;
+                continue;
+            }
+            if (it->second.getNick() == str)
+                return (i);
+            i++;
+        }
+        return (0);
     }
     return 1;
 }

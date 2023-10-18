@@ -9,6 +9,7 @@
 
 #include "server.hpp"
 #include "client.hpp"
+#include "tools.hpp"
 
 enum Commands{
     PASS,
@@ -41,16 +42,17 @@ public:
     void setMsg(std::string msg);
     int getIndexOfCommand();
     void setIndexOfCommand(int index);
-    void parse(int socket);
+    void parse(Client &client);
     void execute(std::map<int, Client> &client, int index);
     void trimString(std::string &str);
     static void fillListOfCommands();
     void toUpper(std::string &str);
-    void sendToClient(std::string msg, int clientSocket);
+    void sendToClient(const std::string &msg, int clientSocket);
     void Password(std::map<int, Client> &client, int index);
     void Nick(std::map<int, Client> &client, int index);
     void User(std::map<int, Client> &client, int index);
-    int checkUsrNick(std::map<int, Client> &client, int check, std::string str);
+    void Privmsg(std::map<int, Client> &client, int index);
+    int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
 };
 
 #endif // COMMAND_HPP
