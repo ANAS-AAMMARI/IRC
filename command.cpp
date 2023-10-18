@@ -2,6 +2,20 @@
 
 std::vector<std::string> Command::listOfCommands;
 
+int Command::hostnameToIP(std::string hostname) {
+    struct hostent *he;
+    struct in_addr **addr_list;
+    int i;
+    if ((he = gethostbyname(hostname.c_str())) == NULL) {
+        return -1;
+    }
+    addr_list = (struct in_addr **) he->h_addr_list;
+    for (i = 0; addr_list[i] != NULL; i++) {
+        return addr_list[i]->s_addr;
+    }
+    return -1;
+}
+
 void    Command::sendToClient(const std::string &msg, int clientSocket) {
     send(clientSocket, msg.c_str(), msg.size(), 0);
 }
@@ -145,7 +159,7 @@ void Command::Password(std::map<int, Client> &client, int index) {
             sendToClient("You are already registered\n", client[index].getSocket());
             return;
         }
-        sendToClient("password already registered\n", client[index].getSocket());
+        sendToClient(ALREADY_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
     if (args.size() != 1) {
@@ -153,7 +167,7 @@ void Command::Password(std::map<int, Client> &client, int index) {
         return;
     }
     if (args[0] != client[index].getPassword()) {
-        sendToClient("Wrong password\n", client[index].getSocket());
+        sendToClient(PASS_INC_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
     if (args[0] == client[index].getPassword()) {
@@ -168,20 +182,18 @@ void Command::Nick(std::map<int, Client> &client, int index) {
         sendToClient("Password not registered\n", client[index].getSocket());
         return;
     }
-    if (args.size() != 1) {
-        sendToClient("Wrong number of arguments\n", client[index].getSocket());
+    if (args.size() < 1) {
+        sendToClient(NICK_REQUIRED_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
     if (!checkUsrNick(client, 1, args[0], index)) {
-        sendToClient("Nickname already registered, (used by another client)\n", client[index].getSocket());
+        sendToClient(NICK_ALREADY_MSG(args[0]), client[index].getSocket());
         return;
     }
-    if (client[index].getCheck() == 2)
-    {
-        client[index].setNick(args[0]);
-        client[index].increaseCheck();
-        sendToClient("Welcone to IRC server " + args[0] + "\n", client[index].getSocket());
-    }
+    client[index].setNick(args[0]);
+    client[index].increaseCheck();
+    if (client[index].getCheck() == 3)
+        sendToClient(WELCOME_MSG(args[0], "www.irc") , client[index].getSocket());
 }
 
 void Command::User(std::map<int, Client> &client, int index) {
@@ -205,13 +217,11 @@ void Command::User(std::map<int, Client> &client, int index) {
         sendToClient("Username already registered, (used by another client)\n", client[index].getSocket());
         return;
     }*/
-    if (client[index].getCheck() == 2)
-    {
-        client[index].setUser(args[0]);
-        client[index].setIsRegisteredUSER(true);
-        client[index].increaseCheck();
+    client[index].setUser(args[0]);
+    client[index].setIsRegisteredUSER(true);
+    client[index].increaseCheck();
+    if (client[index].getCheck() == 3)
         sendToClient("Welcone to IRC server " + client[index].getNick() + "\n", client[index].getSocket());
-    }
 }
 
 

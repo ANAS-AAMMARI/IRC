@@ -4,6 +4,8 @@ Client::Client() {
     this->isRegistered = false;
     this->isRegisteredPWD = false;
     this->isRegisteredUSER = false;
+    this->nick = "";
+    this->user = "";
     this->check = 0;
 }
 
@@ -50,6 +52,9 @@ Client::Client(std::string nick, std::string user, int socket, std::string passw
     this->socket = socket;
     this->password = password;
     this->isRegistered = false;
+    this->isRegisteredPWD = false;
+    this->isRegisteredUSER = false;
+    this->check = 0;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -59,6 +64,7 @@ Client& Client::operator=(const Client& other) {
         this->socket = other.socket;
         this->password = other.password;
         this->isRegistered = other.isRegistered;
+        this->isRegisteredPWD = other.isRegisteredPWD;
     }
     return *this;
 }

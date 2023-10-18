@@ -7,6 +7,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <netdb.h>
+
 #include "server.hpp"
 #include "client.hpp"
 #include "tools.hpp"
@@ -53,6 +55,7 @@ public:
     void User(std::map<int, Client> &client, int index);
     void Privmsg(std::map<int, Client> &client, int index);
     int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
+    int hostnameToIP(std::string hostname);
 };
 
 #endif // COMMAND_HPP
