@@ -9,6 +9,7 @@
 
 #include "server.hpp"
 #include "client.hpp"
+#include "tools.hpp"
 
 enum Commands{
     PASS,

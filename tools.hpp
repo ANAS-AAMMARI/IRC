@@ -20,4 +20,24 @@
 # define NICK_INVALID_MSG (nick) ":ft_irc 432 " + nick + " :Erroneous nickname\r\n"
 
 
+// error message join
+# define JOIN_NO_SUCH_CHANNEL_MSG (nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
+# define JOIN_CANNOT_SEND_TO_CHANNEL_MSG (nick, channel) ":ft_irc 404 " + nick + " " + channel + " :Cannot send to channel\r\n"
+# define JOIN_TOO_MANY_CHANNEL_MSG (nick, channel) ":ft_irc 405 " + nick + " " + channel + " :You have joined too many channels\r\n"
+# define JOIN_CHANNEL_IS_FULL_MSG (nick, channel) ":ft_irc 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n"
+# define JOIN_BAD_CHANNEL_KEY_MSG (nick, channel) ":ft_irc 475 " + nick + " " + channel + " :Cannot join channel (+k)\r\n"
+# define JOIN_BANNED_FROM_CHANNEL_MSG (nick, channel) ":ft_irc 474 " + nick + " " + channel + " :Cannot join channel (+b)\r\n"
+# define JOIN_BAD_CHANNEL_MASK_MSG (channel) ":ft_irc 476 " + channel + " :Bad Channel Mask\r\n"
+# define JOIN_INVITE_ONLY_CHAN_MSG (nick, channel) ":ft_irc 473 " + nick + " " + channel + " :Cannot join channel (+i)\r\n"
+# define JOIN_NOTOPIC_MSG (nick, channel) ":ft_irc 331 " + nick + " " + channel + " :No topic is set\r\n"
+# define JOIN_TOPIC_MSG (nick, channel, topic) ":ft_irc 332 " + nick + " " + channel + " :" + topic + "\r\n"
+# define JOIN_TOPIC_WHOTIME_MSG (nick, channel, topic, time) ":ft_irc 333 " + nick + " " + channel + " " + topic + " " + time + "\r\n"
+# define JOIN_NAMREPLY_MSG (nick, channel, clients) ":ft_irc 353 " + nick + " = " + channel + " :" + clients + "\r\n"
+# define JOIN_ENDOFNAMES_MSG (nick, channel) ":ft_irc 366 " + nick + " " + channel + " :End of /NAMES list\r\n"
+
+// error message Kick
+# define KICK_CHANOPRIVSNEEDED_MSG (nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
+# define KICK_USERNOTINCHANNEL_MSG (user, nick, channel) ":ft_irc 441 " + user + " " + nick + " " + channel + " :They aren't on that channel\r\n"
+# define KICK_NOTONCHANNEL_MSG (nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
+
 #endif // TOOL_HPP
