@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 
+
 class Client {
 private:
     std::string nick;
@@ -17,6 +18,8 @@ private:
     bool isRegisteredUSER;
     bool isRegistered;
     int  check;
+    int  cmdcheck;
+    //std::vector<Channel> channels;
 public:
     Client();
     Client(int socket, std::string password);
@@ -34,6 +37,7 @@ public:
     bool getIsRegistered();
     bool getIsRegisteredPWD();
     bool getIsRegisteredUSER();
+    int getcmdcheck();
 
     void setIsRegisteredPWD(bool isRegisteredPWD);
     void setIsRegisteredUSER(bool isRegisteredUSER);
@@ -44,6 +48,9 @@ public:
     void setUser(std::string user);
     void setSocket(int socket);
     void setPassword(std::string password);
+    void setcmdcheck(int check);
+
+    //void    joinChannel(std::string channel);
 };
 
 #endif // CLIENT_HPP

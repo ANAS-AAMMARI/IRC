@@ -2,7 +2,7 @@
 
 std::vector<std::string> Command::listOfCommands;
 
-int Command::hostnameToIP(std::string hostname) {
+/*int Command::hostnameToIP(std::string hostname) {
     struct hostent *he;
     struct in_addr **addr_list;
     int i;
@@ -14,6 +14,22 @@ int Command::hostnameToIP(std::string hostname) {
         return addr_list[i]->s_addr;
     }
     return -1;
+}*/
+
+void    Command::Join(std::map<int, Client> &client, int index)
+{
+    if (client[index].getIsRegistered() == false){
+        sendToClient("You are not registered yet\n", client[index].getSocket());
+        return;
+    }
+    if (args.size() < 1){
+        sendToClient("Not enough arguments\n", client[index].getSocket());
+        return;
+    }
+    if (args[0][0] != '#'){
+        sendToClient("Not a channel name, name of channel starts with #\n", client[index].getSocket());
+        return;
+    }
 }
 
 void    Command::sendToClient(const std::string &msg, int clientSocket) {
@@ -140,9 +156,9 @@ void    Command::Privmsg(std::map<int, Client> &client, int index) {
         sendToClient("Wrong number of arguments\n", client[index].getSocket());
         return;
     }
-    int j = 0;
+  int j = 0;
     if (args.size() >= 1)
-        int j = checkUsrNick(client, 3, args[0], index);
+        j = checkUsrNick(client, 3, args[0], index);
     if (j != 0) {
         std::string message = "You received this message: " + args[1] + "from , " + client[index].getNick() + "\n";
         sendToClient(message, j);
@@ -174,6 +190,7 @@ void Command::Password(std::map<int, Client> &client, int index) {
         sendToClient("Password accepted\n", client[index].getSocket());
         client[index].setIsRegisteredPWD(true);
         client[index].increaseCheck();
+        client[index].setcmdcheck(1);
     }
 }
 
@@ -191,7 +208,11 @@ void Command::Nick(std::map<int, Client> &client, int index) {
         return;
     }
     client[index].setNick(args[0]);
-    client[index].increaseCheck();
+    if (client[index].getcmdcheck() == 1)
+    {
+        client[index].increaseCheck();
+        client[index].setcmdcheck(2);
+    }
     if (client[index].getCheck() == 3)
         sendToClient(WELCOME_MSG(args[0], "www.irc") , client[index].getSocket());
 }
@@ -239,6 +260,8 @@ void Command::execute(std::map<int, Client> &client, int index)
             break;
         case 3:
             this->Privmsg(client, index);
+        case 4:
+            this->Join(client, index);
         default:
             break; 
     }

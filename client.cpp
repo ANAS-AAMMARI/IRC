@@ -7,6 +7,7 @@ Client::Client() {
     this->nick = "";
     this->user = "";
     this->check = 0;
+    this->cmdcheck = 0;
 }
 
 int Client::getCheck() {
@@ -44,6 +45,11 @@ Client::Client(int socket, std::string password) {
     this->socket = socket;
     this->password = password;
     this->isRegistered = false;
+    this->isRegisteredPWD = false;
+    this->isRegisteredUSER = false;
+    this->check = 0;
+    this->nick = "";
+    this->user = "";
 }
 
 Client::Client(std::string nick, std::string user, int socket, std::string password) {
@@ -55,6 +61,7 @@ Client::Client(std::string nick, std::string user, int socket, std::string passw
     this->isRegisteredPWD = false;
     this->isRegisteredUSER = false;
     this->check = 0;
+    this->cmdcheck = 0;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -107,3 +114,15 @@ void Client::setSocket(int socket) {
 void Client::setPassword(std::string password) {
     this->password = password;
 }
+
+void    Client::setcmdcheck(int check) {
+    this->cmdcheck = check;
+}
+
+int Client::getcmdcheck() {
+    return this->cmdcheck;
+}
+
+/*void Client::joinChannel(std::string channel) {
+    //std::
+}*/
