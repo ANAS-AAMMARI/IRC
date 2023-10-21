@@ -23,7 +23,6 @@
 
 // error message join
 # define JOIN_NO_SUCH_CHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
-# define JOIN_CANNOT_SEND_TO_CHANNEL_MSG(nick, channel) ":ft_irc 404 " + nick + " " + channel + " :Cannot send to channel\r\n"
 # define JOIN_TOO_MANY_CHANNEL_MSG(nick, channel) ":ft_irc 405 " + nick + " " + channel + " :You have joined too many channels\r\n"
 # define JOIN_CHANNEL_IS_FULL_MSG(nick, channel) ":ft_irc 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n"
 # define JOIN_BAD_CHANNEL_KEY_MSG(nick, channel) ":ft_irc 475 " + nick + " " + channel + " :Cannot join channel (+k)\r\n"
@@ -40,5 +39,13 @@
 # define KICK_CHANOPRIVSNEEDED_MSG(nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
 # define KICK_USERNOTINCHANNEL_MSG(user, nick, channel) ":ft_irc 441 " + user + " " + nick + " " + channel + " :They aren't on that channel\r\n"
 # define KICK_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
+
+// error message PRIVMSG
+# define PRIVMSG_NOSUCHNICK_MSG(nick, recipient) ":ft_irc 401 " + nick + " " + recipient + " :No such nick/channel\r\n"
+# define PRIVMSG_CANNOTSENDTOCHAN_MSG(nick, recipient) ":ft_irc 404 " + nick + " " + recipient + " :Cannot send to channel\r\n"
+# define PRIVMSG_NORECIPIENT_MSG(nick) ":ft_irc 411 " + nick + " :No recipient given (PRIVMSG)\r\n"
+# define PRIVMSG_NOTEXTTOSEND_MSG(nick) ":ft_irc 412 " + nick + " :No text to send\r\n"
+# define PRIVMSG_AWAY_MSG(nick, user, ip, recipient, awayMsg) "" + nick + "!~" + user + "@" + ip + " PRIVMSG " + recipient + " :" + awayMsg + "\r\n"
+# define PRIVMSG_NOTREGISTERED(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
 
 #endif // TOOL_HPP

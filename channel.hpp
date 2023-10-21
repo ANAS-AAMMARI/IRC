@@ -1,26 +1,33 @@
 #ifndef CHANNEL_HPP
 # define CHANNEL_HPP
 
-#include "client.hpp"
-#include "tools.hpp"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+
 #include "server.hpp"
-#include "command.hpp"
+#include "client.hpp"
+
+class Client;
 
 class Channel {
 private:
     std::string name;
     std::vector<Client> clients;
 public:
+    Channel();
     Channel(std::string name);
     Channel& operator=(const Channel& other);
     Channel(const Channel& other);
     ~Channel();
     void setName(std::string name);
     std::string getName();
-    void addClient(Client client);
+    void addClient(Client &client);
     void removeClient(int index);
-    void sendToAll(std::string msg);
-    void sendToAllButOne(std::string msg, int index);
+    void sendToAllButOne(std::string msg, std::string nickname);
+    int checkNick(std::string nickname);
 };
 
 #endif

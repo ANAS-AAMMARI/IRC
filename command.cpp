@@ -262,9 +262,14 @@ void Command::NICKCommand(std::map<int, Client> &client, int index)
         sendToClient(NICK_INVALID_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
-    if (checkNickUser(client, this->args[0], 1) != -1 && client[index].getIsRegistered())
+    if (this->args[0] == client[index].getNick())
+        return;
+    if (checkNickUser(client, this->args[0], 1) != -1)
     {
-        sendToClient(NICK_ALREADY_MSG(client[index].getNick()), client[index].getSocket());
+        if (client[index].getIsRegistered())
+            sendToClient(NICK_ALREADY_MSG(client[index].getNick()), client[index].getSocket());
+        else
+            sendToClient(NICK_ALREADY_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
     std::string oldNick = client[index].getNick();
@@ -293,7 +298,7 @@ void Command::USERCommand(std::map<int, Client> &client, int index)
     client[index].setUser(this->args[0]);
 }
 
-void Command::registerClient(std::map<int, Client> &client, int index)
+void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     switch (this->indexOfCommand)
     {
@@ -305,6 +310,9 @@ void Command::registerClient(std::map<int, Client> &client, int index)
         break;
     case USER:
         this->USERCommand(client, index);
+        break;
+    case PRIVMSG:
+        this->PRIVMSGCommand(client, index, channel);
         break;
     default:
         break;
@@ -321,10 +329,53 @@ void Command::registerClient(std::map<int, Client> &client, int index)
     sendToClient(ISUPPORT_MSG(client[index].getNick(), "PREFIX=(ov)@+ CHANTYPES=#&+ CHANMODES=,,,"), client[index].getSocket());
 }
 
-void Command::execute(std::map<int, Client> &client, int index)
+void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
-        this->registerClient(client, index);
+    {
+        sendToClient(PRIVMSG_NOTREGISTERED(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+   
+    if (this->args.size() < 2)
+    {
+        if (this->args.size() < 1)
+            sendToClient(PRIVMSG_NORECIPIENT_MSG(client[index].getNick()), client[index].getSocket());
+        else
+            sendToClient(PRIVMSG_NOTEXTTOSEND_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args[0][0] == '#')
+    {
+        int id = check_if_exist(this->args[0], channel);
+        if (channel.find(id) != channel.end())
+        {
+            if (channel[id].checkNick(client[index].getNick()) == -1)
+            {
+                sendToClient(PRIVMSG_CANNOTSENDTOCHAN_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+                return;
+            }
+            channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(),
+                client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
+        }    
+        else
+           sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+    }
+    else
+    {
+        int id = checkNickUser(client, this->args[0], 1);
+        if (id != -1)
+            sendToClient(PRIVMSG_AWAY_MSG(client[index].getNick(),
+                client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[id].getSocket());
+        else
+            sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+    }
+}
+
+void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
+{
+    if (!client[index].getIsRegistered())
+        this->registerClient(client, index, channel);
     else
     {
         switch (this->indexOfCommand)
@@ -339,6 +390,7 @@ void Command::execute(std::map<int, Client> &client, int index)
             this->USERCommand(client, index);
             break;
         case PRIVMSG:
+            this->PRIVMSGCommand(client, index, channel);
             break;
         case JOIN:
             break;
@@ -356,4 +408,17 @@ void Command::execute(std::map<int, Client> &client, int index)
             break;
         }
     }
+}
+
+int Command::check_if_exist(std::string channel, std::map<int, Channel> &channels)
+{
+    std::map<int, Channel>::iterator it;
+    int i = 0;
+    for (it = channels.begin(); it != channels.end(); ++it)
+    {
+        if (it->second.getName() == channel)
+            return i;
+        i++;
+    }
+    return -1;
 }

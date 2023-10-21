@@ -28,6 +28,8 @@ enum Commands{
     INVITE,
 };
 
+class Channel;
+
 class Command {
 private:
     std::string msg;
@@ -50,7 +52,7 @@ public:
     void setIndexOfCommand(int index);
 
     void parse(Client &client);
-    void execute(std::map<int, Client> &client, int index);
+    void execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void trimString(std::string &str);
     int checkNickUser(std::map<int, Client> &client, std::string input, int who);
     std::string removeSpaces(std::string &msg);
@@ -59,12 +61,17 @@ public:
     void sendToClient(const std::string &msg, int clientSocket);
     std::string getCurrentDateTime();
     std::string getLoclalIp();
-    void registerClient(std::map<int, Client> &client, int index);
+    void registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
 
     bool checkNick(const std::string &nick);
     void PASSCommand(std::map<int, Client> &client, int index);
     void NICKCommand(std::map<int, Client> &client, int index);
     void USERCommand(std::map<int, Client> &client, int index);
+    void PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channel);
+    void Join(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
+    void check_channel(std::string channel, Client &client, std::map<int, Channel> &channels);
+    int  check_if_exist(std::string chan, std::map<int, Channel> &channels);
 
 };
 

@@ -18,6 +18,7 @@
 
 #include "client.hpp"
 #include "command.hpp"
+#include "channel.hpp"
 
 class Server {
 private:
@@ -26,6 +27,7 @@ private:
     static const int BUFFER_SIZE;
     std::vector<struct pollfd> pollfds;
     std::map<int, Client> clients;
+    std::map<int, Channel> channels;
     void handleNewConnection();
     void handelClientMessage(int clientSocket);
     void handleClientDisconnection(int clientSocket);

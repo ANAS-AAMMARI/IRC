@@ -7,12 +7,14 @@ CPPFLAGS=-Wall -Wextra -Werror -std=c++98
 HEADER=	command.hpp \
 		server.hpp 	\
 		client.hpp	\
-		tools.hpp
+		tools.hpp	\
+		channel.hpp	
 
 SRC=	main.cpp \
 		command.cpp \
 		server.cpp	\
-		client.cpp
+		client.cpp	\
+		channel.cpp	
 
 OBJ=$(SRC:.cpp=.o)
 

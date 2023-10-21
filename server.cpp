@@ -183,7 +183,7 @@ void Server::handelClientMessage(int clientSocket)
     {
         std::string message(buffer);
         Command command(message, clients, clientSocket);
-        command.execute(clients, clientSocket);
+        command.execute(clients, clientSocket, channels);
     }
 }
 
