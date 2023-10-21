@@ -345,32 +345,90 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
             sendToClient(PRIVMSG_NOTEXTTOSEND_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
-    if (this->args[0][0] == '#')
+    std::stringstream ss(this->args[0]);
+    std::string getline;
+    std::vector<std::string> recipients;
+    while (std::getline(ss, getline, ','))
+        recipients.push_back(getline);
+    for (size_t i = 0; i < recipients.size(); i++)
     {
-        int id = check_if_exist(this->args[0], channel);
-        if (channel.find(id) != channel.end())
+        if (recipients[i].empty())
+            continue;
+        if (recipients[i][0] == '#')
         {
-            if (channel[id].checkNick(client[index].getNick()) == -1)
+            int id = check_if_exist(recipients[i], channel);
+            if (channel.find(id) != channel.end())
             {
-                sendToClient(PRIVMSG_CANNOTSENDTOCHAN_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-                return;
-            }
-            channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(),
-                client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
-        }    
+                if (channel[id].checkNick(client[index].getNick()) == -1)
+                {
+                    sendToClient(PRIVMSG_CANNOTSENDTOCHAN_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                    return;
+                }
+                channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(),
+                    client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
+            }    
+            else
+            sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+        }
         else
-           sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-    }
-    else
-    {
-        int id = checkNickUser(client, this->args[0], 1);
-        if (id != -1)
-            sendToClient(PRIVMSG_AWAY_MSG(client[index].getNick(),
-                client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[id].getSocket());
-        else
-            sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        {
+            int id = checkNickUser(client, recipients[i], 1);
+            if (id != -1)
+                sendToClient(PRIVMSG_AWAY_MSG(client[index].getNick(),
+                    client[index].getUser(), getLoclalIp(), recipients[i], this->args[1]), client[id].getSocket());
+            else
+                sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+        }
     }
 }
+
+void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(JOIN_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 1)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "JOIN"), client[index].getSocket());
+        return;
+    }
+    std::stringstream ss(this->args[0]);
+    std::string getline;
+    std::vector<std::string> recipients;
+    while (std::getline(ss, getline, ','))
+        recipients.push_back(getline);
+    
+    for (size_t i = 0; i < recipients.size(); i++)
+    {
+        if (recipients[i].empty())
+            continue;
+         if (recipients[i][0] != '#')
+        {
+            sendToClient(JOIN_NO_SUCH_CHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            continue;
+        }
+        int id = check_if_exist(recipients[i], channels);
+        if (id != -1)
+        {
+            if (channels[id].checkNick(client[index].getNick()) != -1)
+                continue;
+            channels[id].addClient(client[index]);
+            channels[id].sendToAll(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]));
+            sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[id].getClients()), client[index].getSocket());
+        }
+        else
+        {
+            Channel newChannel(recipients[i]);
+            newChannel.addNick(client[index].getNick());
+            channels.insert(std::pair<int, Channel>(channels.size(), newChannel));
+            channels[channels.size() - 1].sendToAllButOne(JOIN_MSG(client[index].getNick(), recipients[i]), client[index].getNick());
+        }
+    }
+    
+}
+
 
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {

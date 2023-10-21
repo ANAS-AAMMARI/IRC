@@ -68,7 +68,7 @@ public:
     void NICKCommand(std::map<int, Client> &client, int index);
     void USERCommand(std::map<int, Client> &client, int index);
     void PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channel);
-    void Join(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    void JOINCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
     void check_channel(std::string channel, Client &client, std::map<int, Channel> &channels);
     int  check_if_exist(std::string chan, std::map<int, Channel> &channels);

@@ -32,9 +32,10 @@
 # define JOIN_NOTOPIC_MSG(nick, channel) ":ft_irc 331 " + nick + " " + channel + " :No topic is set\r\n"
 # define JOIN_TOPIC_MSG(nick, channel, topic) ":ft_irc 332 " + nick + " " + channel + " :" + topic + "\r\n"
 # define JOIN_TOPIC_WHOTIME_MSG(nick, channel, topic, time) ":ft_irc 333 " + nick + " " + channel + " " + topic + " " + time + "\r\n"
-# define JOIN_NAMREPLY_MSG(nick, channel, clients) ":ft_irc 353 " + nick + " = " + channel + " :" + clients + "\r\n"
+# define JOIN_NAMREPLY_MSG(nick, channel, clients) ":ft_irc 353 " + nick + " @ " + channel + " :" + clients + "\r\n"
 # define JOIN_ENDOFNAMES_MSG(nick, channel) ":ft_irc 366 " + nick + " " + channel + " :End of /NAMES list\r\n"
-
+# define JOIN_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
+# define JOIN_MSG(nick, user, ip, chan) "" + nick + "!~" + user + "@" + ip + " JOIN " + chan + "\r\n"
 // error message Kick
 # define KICK_CHANOPRIVSNEEDED_MSG(nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
 # define KICK_USERNOTINCHANNEL_MSG(user, nick, channel) ":ft_irc 441 " + user + " " + nick + " " + channel + " :They aren't on that channel\r\n"

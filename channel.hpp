@@ -27,7 +27,9 @@ public:
     void addClient(Client &client);
     void removeClient(int index);
     void sendToAllButOne(std::string msg, std::string nickname);
+    void sendToAll(std::string msg);
     int checkNick(std::string nickname);
+    
 };
 
 #endif

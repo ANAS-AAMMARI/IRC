@@ -52,3 +52,9 @@ int Channel::checkNick(std::string nickname) {
     }
     return -1;
 }
+
+void Channel::sendToAll(std::string msg) {
+    for (size_t i = 0; i < this->clients.size(); i++) {
+        send(this->clients[i].getSocket(), msg.c_str(), msg.size(), 0);
+    }
+}
