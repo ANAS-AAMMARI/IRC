@@ -57,4 +57,22 @@ void Channel::sendToAll(std::string msg) {
     for (size_t i = 0; i < this->clients.size(); i++) {
         send(this->clients[i].getSocket(), msg.c_str(), msg.size(), 0);
     }
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        send(this->listofAdmins[i].getSocket(), msg.c_str(), msg.size(), 0);
+    }
+}
+
+std::string Channel::getClients() {
+    std::string clients;
+    for (size_t i = 0; i < this->clients.size(); i++) {
+        clients += this->clients[i].getNick() + " ";
+    }
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        clients += "@" + this->listofAdmins[i].getNick() + " ";
+    }
+    return clients;
+}
+
+void Channel::addAdmin(Client &client) {
+    this->listofAdmins.push_back(client);
 }

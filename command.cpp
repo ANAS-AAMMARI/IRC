@@ -314,6 +314,9 @@ void Command::registerClient(std::map<int, Client> &client, int index, std::map<
     case PRIVMSG:
         this->PRIVMSGCommand(client, index, channel);
         break;
+    case JOIN:
+        this->JOINCommand(client, index, channel);
+        break;
     default:
         break;
     }
@@ -416,14 +419,15 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
                 continue;
             channels[id].addClient(client[index]);
             channels[id].sendToAll(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]));
+            std::cout << channels[id].getClients() << std::endl;
             sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[id].getClients()), client[index].getSocket());
         }
         else
         {
             Channel newChannel(recipients[i]);
-            newChannel.addNick(client[index].getNick());
-            channels.insert(std::pair<int, Channel>(channels.size(), newChannel));
-            channels[channels.size() - 1].sendToAllButOne(JOIN_MSG(client[index].getNick(), recipients[i]), client[index].getNick());
+            channels[channels.size()] = newChannel;
+            channels[channels.size() - 1].addAdmin(client[index]);
+            sendToClient(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]), client[index].getSocket());
         }
     }
     
@@ -451,6 +455,7 @@ void Command::execute(std::map<int, Client> &client, int index, std::map<int, Ch
             this->PRIVMSGCommand(client, index, channel);
             break;
         case JOIN:
+            this->JOINCommand(client, index, channel);
             break;
         case PART:
             break;

@@ -16,6 +16,7 @@ class Channel {
 private:
     std::string name;
     std::vector<Client> clients;
+    std::vector<Client> listofAdmins;
 public:
     Channel();
     Channel(std::string name);
@@ -25,11 +26,12 @@ public:
     void setName(std::string name);
     std::string getName();
     void addClient(Client &client);
+    void addAdmin(Client &client);
     void removeClient(int index);
     void sendToAllButOne(std::string msg, std::string nickname);
     void sendToAll(std::string msg);
     int checkNick(std::string nickname);
-    
+    std::string getClients();
 };
 
 #endif
