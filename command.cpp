@@ -262,7 +262,7 @@ void Command::NICKCommand(std::map<int, Client> &client, int index)
         sendToClient(NICK_INVALID_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
-    if (checkNickUser(client, this->args[0], 1) != -1)
+    if (checkNickUser(client, this->args[0], 1) != -1 && client[index].getIsRegistered())
     {
         sendToClient(NICK_ALREADY_MSG(client[index].getNick()), client[index].getSocket());
         return;
@@ -285,7 +285,7 @@ void Command::USERCommand(std::map<int, Client> &client, int index)
         sendToClient(REQUIRED_MSG(client[index].getNick(), "USER"), client[index].getSocket());
         return;
     }
-    if (checkNickUser(client, this->args[0], 2) != -1)
+    if (checkNickUser(client, this->args[0], 2) != -1 && client[index].getIsRegistered())
     {
         sendToClient(ALREADY_MSG(client[index].getNick()), client[index].getSocket());
         return;
