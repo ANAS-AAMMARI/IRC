@@ -14,12 +14,9 @@ private:
     std::string user;
     int socket;
     std::string password;
-    bool isRegisteredPWD;
-    bool isRegisteredUSER;
     bool isRegistered;
-    int  check;
-    int  cmdcheck;
-    //std::vector<Channel> channels;
+    bool isValidPass;
+
 public:
     Client();
     Client(int socket, std::string password);
@@ -32,25 +29,16 @@ public:
     std::string getUser();
     int getSocket();
     std::string getPassword();
-    int getCheck();
-
     bool getIsRegistered();
-    bool getIsRegisteredPWD();
-    bool getIsRegisteredUSER();
-    int getcmdcheck();
-
-    void setIsRegisteredPWD(bool isRegisteredPWD);
-    void setIsRegisteredUSER(bool isRegisteredUSER);
-    void setIsRegistered(bool isRegistered);
-    void increaseCheck();
+    bool getIsValidPass();
 
     void setNick(std::string nick);
     void setUser(std::string user);
     void setSocket(int socket);
     void setPassword(std::string password);
-    void setcmdcheck(int check);
+    void setIsRegistered(bool isRegistered);
+    void setIsValidPass(bool isValidPass);
 
-    //void    joinChannel(std::string channel);
 };
 
 #endif // CLIENT_HPP

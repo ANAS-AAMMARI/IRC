@@ -1,55 +1,17 @@
 #include "client.hpp"
 
 Client::Client() {
-    this->isRegistered = false;
-    this->isRegisteredPWD = false;
-    this->isRegisteredUSER = false;
     this->nick = "";
     this->user = "";
-    this->check = 0;
-    this->cmdcheck = 0;
-}
-
-int Client::getCheck() {
-    return this->check;
-}
-
-void Client::increaseCheck() {
-    this->check++;
-}
-bool Client::getIsRegistered() {
-    return this->isRegistered;
-}
-
-bool Client::getIsRegisteredPWD() {
-    return this->isRegisteredPWD;
-}
-
-bool Client::getIsRegisteredUSER() {
-    return this->isRegisteredUSER;
-}
-
-void Client::setIsRegisteredPWD(bool isRegisteredPWD) {
-    this->isRegisteredPWD = isRegisteredPWD;
-}
-
-void Client::setIsRegisteredUSER(bool isRegisteredUSER) {
-    this->isRegisteredUSER = isRegisteredUSER;
-}
-
-void Client::setIsRegistered(bool isRegistered) {
-    this->isRegistered = isRegistered;
 }
 
 Client::Client(int socket, std::string password) {
     this->socket = socket;
     this->password = password;
-    this->isRegistered = false;
-    this->isRegisteredPWD = false;
-    this->isRegisteredUSER = false;
-    this->check = 0;
-    this->nick = "";
     this->user = "";
+    this->nick = "";
+    this->isRegistered = false;
+    this->isValidPass = false;
 }
 
 Client::Client(std::string nick, std::string user, int socket, std::string password) {
@@ -58,10 +20,7 @@ Client::Client(std::string nick, std::string user, int socket, std::string passw
     this->socket = socket;
     this->password = password;
     this->isRegistered = false;
-    this->isRegisteredPWD = false;
-    this->isRegisteredUSER = false;
-    this->check = 0;
-    this->cmdcheck = 0;
+    this->isValidPass = false;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -71,7 +30,7 @@ Client& Client::operator=(const Client& other) {
         this->socket = other.socket;
         this->password = other.password;
         this->isRegistered = other.isRegistered;
-        this->isRegisteredPWD = other.isRegisteredPWD;
+        this->isValidPass = other.isValidPass;
     }
     return *this;
 }
@@ -99,6 +58,14 @@ std::string Client::getPassword() {
     return this->password;
 }
 
+bool Client::getIsValidPass() {
+    return this->isValidPass;
+}
+
+bool Client::getIsRegistered() {
+    return this->isRegistered;
+}
+
 void Client::setNick(std::string nick) {
     this->nick = nick;
 }
@@ -115,14 +82,10 @@ void Client::setPassword(std::string password) {
     this->password = password;
 }
 
-void    Client::setcmdcheck(int check) {
-    this->cmdcheck = check;
+void Client::setIsRegistered(bool isRegistered) {
+    this->isRegistered = isRegistered;
 }
 
-int Client::getcmdcheck() {
-    return this->cmdcheck;
+void Client::setIsValidPass(bool isValidPass) {
+    this->isValidPass = isValidPass;
 }
-
-/*void Client::joinChannel(std::string channel) {
-    //std::
-}*/

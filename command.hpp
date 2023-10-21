@@ -6,8 +6,9 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
-
 #include <netdb.h>
+// #include <ctime>
+// #include <cstdio>
 
 #include "server.hpp"
 #include "client.hpp"
@@ -51,16 +52,20 @@ public:
     void parse(Client &client);
     void execute(std::map<int, Client> &client, int index);
     void trimString(std::string &str);
+    int checkNickUser(std::map<int, Client> &client, std::string input, int who);
+    std::string removeSpaces(std::string &msg);
     static void fillListOfCommands();
     void toUpper(std::string &str);
     void sendToClient(const std::string &msg, int clientSocket);
+    std::string getCurrentDateTime();
+    std::string getLoclalIp();
+    void registerClient(std::map<int, Client> &client, int index);
 
-    void Password(std::map<int, Client> &client, int index);
-    void Nick(std::map<int, Client> &client, int index);
-    void User(std::map<int, Client> &client, int index);
-    void Privmsg(std::map<int, Client> &client, int index);
-    void Join(std::map<int, Client> &client, int index);
-    int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
+    bool checkNick(const std::string &nick);
+    void PASSCommand(std::map<int, Client> &client, int index);
+    void NICKCommand(std::map<int, Client> &client, int index);
+    void USERCommand(std::map<int, Client> &client, int index);
+
 };
 
 #endif // COMMAND_HPP
