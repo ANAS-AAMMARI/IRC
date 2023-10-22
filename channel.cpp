@@ -42,11 +42,21 @@ void Channel::sendToAllButOne(std::string msg, std::string nickname) {
             send(this->clients[i].getSocket(), msg.c_str(), msg.size(), 0);
         }
     }
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        if (this->listofAdmins[i].getNick() != nickname) {
+            send(this->listofAdmins[i].getSocket(), msg.c_str(), msg.size(), 0);
+        }
+    }
 }
 
 int Channel::checkNick(std::string nickname) {
     for (size_t i = 0; i < this->clients.size(); i++) {
         if (this->clients[i].getNick() == nickname) {
+            return i;
+        }
+    }
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        if (this->listofAdmins[i].getNick() == nickname) {
             return i;
         }
     }

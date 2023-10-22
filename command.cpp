@@ -159,25 +159,15 @@ void Command::parse(Client &client)
     if (this->msg.find(':') != std::string::npos)
     {
         std::getline(ss, temp, ':');
-        // this->trimString(temp);
         std::stringstream ss2(temp);
         while (std::getline(ss2, temp, ' '))
-        {
-            // this->trimString(temp);
             this->args.push_back(temp);
-        }
         std::getline(ss, temp);
-        // this->trimString(temp);
         this->args.push_back(temp);
     }
     else
-    {
         while (std::getline(ss, temp, ' '))
-        {
-            // this->trimString(temp);
             this->args.push_back(temp);
-        }
-    }
 }
 
 std::string Command::getCurrentDateTime()
@@ -371,7 +361,7 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
                     client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
             }    
             else
-            sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
         else
         {
@@ -419,8 +409,8 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
                 continue;
             channels[id].addClient(client[index]);
             channels[id].sendToAll(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]));
-            std::cout << channels[id].getClients() << std::endl;
             sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[id].getClients()), client[index].getSocket());
+            sendToClient(JOIN_ENDOFNAMES_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
         else
         {
@@ -428,6 +418,8 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
             channels[channels.size()] = newChannel;
             channels[channels.size() - 1].addAdmin(client[index]);
             sendToClient(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]), client[index].getSocket());
+            sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[channels.size() - 1].getClients()), client[index].getSocket());
+            sendToClient(JOIN_ENDOFNAMES_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
     }
     
