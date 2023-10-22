@@ -290,26 +290,7 @@ void Command::USERCommand(std::map<int, Client> &client, int index)
 
 void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
-    switch (this->indexOfCommand)
-    {
-    case PASS:
-        this->PASSCommand(client, index);
-        break;
-    case NICK:
-        this->NICKCommand(client, index);
-        break;
-    case USER:
-        this->USERCommand(client, index);
-        break;
-    case PRIVMSG:
-        this->PRIVMSGCommand(client, index, channel);
-        break;
-    case JOIN:
-        this->JOINCommand(client, index, channel);
-        break;
-    default:
-        break;
-    }
+    this->commandHandler(client, index, channel);
     if (!client[index].getIsValidPass())
         return;
     if (client[index].getNick().empty() || client[index].getUser().empty())
@@ -425,15 +406,79 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
     
 }
 
+void Command::INVITECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(INVITE_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 2)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "INVITE"), client[index].getSocket());
+        return;
+    }
+    int id = checkNickUser(client, this->args[0], 1);
+    int id2 = check_if_exist(this->args[1], channels);
+    if (id == -1)
+    {
+        sendToClient(INVITE_NOSUCHNICK_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (id2 == -1)
+    {
+        sendToClient(INVITE_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[1]), client[index].getSocket());
+        return;
+    }
+    if (channels[id2].checkNick(this->args[0]) != -1)
+    {
+        sendToClient(INVITE_USERONCHANNEL_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
+        return;
+    }
+    if (channels[id2].checkNick(client[index].getNick()) == -1)
+    {
+        sendToClient(INVITE_NOTONCHANNEL_MSG(client[index].getNick(), this->args[1]), client[index].getSocket());
+        return;
+    }
+    if (channels[id2].checkAdmin(client[index].getNick()) == -1)
+    {
+        sendToClient(INVITE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[1]), client[index].getSocket());
+        return;
+    }
+    if (channels[id2].checkNick(this->args[0]) != -1)
+    {
+        sendToClient(INVITE_USERONCHANNEL_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
+        return;
+    }
+    sendToClient(INVITE_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[id].getSocket());
+    sendToClient(INVITE_SUCCESS_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
+}
 
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
         this->registerClient(client, index, channel);
     else
+        this->commandHandler(client, index, channel);
+}
+
+int Command::check_if_exist(std::string channel, std::map<int, Channel> &channels)
+{
+    std::map<int, Channel>::iterator it;
+    int i = 0;
+    for (it = channels.begin(); it != channels.end(); ++it)
     {
-        switch (this->indexOfCommand)
-        {
+        if (it->second.getName() == channel)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
+void Command::commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
+{
+    switch (this->indexOfCommand)
+    {
         case PASS:
             this->PASSCommand(client, index);
             break;
@@ -458,22 +503,9 @@ void Command::execute(std::map<int, Client> &client, int index, std::map<int, Ch
         case KICK:
             break;
         case INVITE:
+            this->INVITECommand(client, index, channel);
             break;
         default:
             break;
-        }
     }
-}
-
-int Command::check_if_exist(std::string channel, std::map<int, Channel> &channels)
-{
-    std::map<int, Channel>::iterator it;
-    int i = 0;
-    for (it = channels.begin(); it != channels.end(); ++it)
-    {
-        if (it->second.getName() == channel)
-            return i;
-        i++;
-    }
-    return -1;
 }

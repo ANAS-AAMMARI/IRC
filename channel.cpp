@@ -49,6 +49,15 @@ void Channel::sendToAllButOne(std::string msg, std::string nickname) {
     }
 }
 
+int Channel::checkAdmin(std::string nickname) {
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        if (this->listofAdmins[i].getNick() == nickname) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 int Channel::checkNick(std::string nickname) {
     for (size_t i = 0; i < this->clients.size(); i++) {
         if (this->clients[i].getNick() == nickname) {

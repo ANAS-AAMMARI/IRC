@@ -49,4 +49,13 @@
 # define PRIVMSG_AWAY_MSG(nick, user, ip, recipient, awayMsg) "" + nick + "!~" + user + "@" + ip + " PRIVMSG " + recipient + " :" + awayMsg + "\r\n"
 # define PRIVMSG_NOTREGISTERED(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
 
+// error message INVITE
+# define INVITE_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
+# define INVITE_NOSUCHNICK_MSG(nick, recipient) ":ft_irc 401 " + nick + " " + recipient + " :No such nick/channel\r\n"
+# define INVITE_NOSUCHCHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
+# define INVITE_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
+# define INVITE_CHANOPRIVSNEEDED_MSG(nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
+# define INVITE_USERONCHANNEL_MSG(nick, recipient, channel) ":ft_irc 443 " + nick + " " + recipient + " " + channel + " :is already on channel\r\n"
+# define INVITE_MSG(nick, user, ip, recipient, channel) "" + nick + "!~" + user + "@" + ip + " INVITE " + recipient + " " + channel + "\r\n"
+# define INVITE_SUCCESS_MSG(nick, recipient, channel) ":ft_irc 341 " + nick + " " + recipient + " " + channel + "\r\n"
 #endif // TOOL_HPP

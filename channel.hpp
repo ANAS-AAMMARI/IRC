@@ -31,6 +31,7 @@ public:
     void sendToAllButOne(std::string msg, std::string nickname);
     void sendToAll(std::string msg);
     int checkNick(std::string nickname);
+    int checkAdmin(std::string nickname);
     std::string getClients();
 };
 
