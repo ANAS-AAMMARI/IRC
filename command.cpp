@@ -111,24 +111,35 @@ void Command::trimString(std::string &str)
         str = str.substr(0, end + 1);
 }
 
-std::string Command::removeSpaces(std::string &msg)
+void Command::removeSpaces(std::string &msg)
 {
+    std::string temp = "";
     trimString(msg);
+    size_t index = msg.find(":");
+    if (index != std::string::npos)
+        temp = msg.substr(0, index);
+    else
+    {
+        temp = msg;
+        index  = msg.size();
+    }
+    trimString(temp);
     std::string result;
     bool previousIsSpace = false;
-    for (size_t i = 0; i < msg.size(); i++) {
-        if (std::isspace(msg[i])) {
+    for (size_t i = 0; i < temp.size(); i++) {
+        if (std::isspace(temp[i])) {
             if (!previousIsSpace) {
                 result += ' ';
             }
             previousIsSpace = true;
         } else {
-            result += msg[i];
+            result += temp[i];
             previousIsSpace = false;
         }
     }
-    return result;
+   this->msg = result + msg.substr(index);
 }
+
 
 void Command::toUpper(std::string &str)
 {
@@ -544,6 +555,64 @@ void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int
     }
 }
 
+void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(TOPIC_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 1)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "TOPIC"), client[index].getSocket());
+        return;
+    }
+    int id = check_if_exist(this->args[0], channels);
+    if (id == -1)
+    {
+        sendToClient(TOPIC_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkNick(client[index].getNick()) == -1)
+    {
+        sendToClient(TOPIC_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkAdmin(client[index].getNick()) != -1)
+    {
+        if (this->args.size() < 2)
+        {
+            if (channels[id].getTopic().empty())
+                sendToClient(TOPIC_NOTOPIC_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            else
+                sendToClient(TOPIC_MSG(client[index].getNick(), this->args[0], channels[id].getTopic()), client[index].getSocket());
+            return;
+        }
+        if (this->args[1].empty())
+        {
+            channels[id].setTopic("");
+            channels[id].sendToAll(TOPIC_MSG(client[index].getNick(), this->args[0], ""));
+            return;
+        }
+        channels[id].setTopic(this->args[1]);
+        channels[id].sendToAll(TOPIC_MSG(client[index].getNick(), this->args[0], this->args[1]));
+    }
+    else
+    {
+        if (this->args.size() < 2)
+        {
+            if (channels[id].getTopic().empty())
+                sendToClient(TOPIC_NOTOPIC_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            else
+                sendToClient(TOPIC_MSG(client[index].getNick(), this->args[0], channels[id].getTopic()), client[index].getSocket());
+            return;
+        }
+        sendToClient(TOPIC_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+
+}
+
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
@@ -588,8 +657,10 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
             this->PARTCommand(client, index, channel);
             break;
         case MODE:
+            // this->MODECommand(client, index, channel);
             break;
         case TOPIC:
+            this->TOPICCommand(client, index, channel);
             break;
         case KICK:
             this->KICKCommand(client, index, channel);

@@ -2,14 +2,21 @@
 
 Channel::Channel() {
     this->name = "";
+    this->topic = "";
 }
 
 Channel::Channel(std::string name) {
     this->name = name;
+    this->topic = "";
 }
 
 Channel& Channel::operator=(const Channel& other) {
-    this->name = other.name;
+    if (this != &other) {
+        this->name = other.name;
+        this->topic = other.topic;
+        this->clients = other.clients;
+        this->listofAdmins = other.listofAdmins;
+    }
     return *this;
 }
 
@@ -24,8 +31,16 @@ void Channel::setName(std::string name) {
     this->name = name;
 }
 
+void Channel::setTopic(std::string topic) {
+    this->topic = topic;
+}
+
 std::string Channel::getName() {
     return this->name;
+}
+
+std::string Channel::getTopic() {
+    return this->topic;
 }
 
 void Channel::addClient(Client &client) {

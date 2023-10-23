@@ -14,6 +14,7 @@ class Client;
 
 class Channel {
 private:
+    std::string topic;
     std::string name;
     std::vector<Client> clients;
     std::vector<Client> listofAdmins;
@@ -24,7 +25,9 @@ public:
     Channel(const Channel& other);
     ~Channel();
     void setName(std::string name);
+    void setTopic(std::string topic);
     std::string getName();
+    std::string getTopic();
     void addClient(Client &client);
     void addAdmin(Client &client);
     void removeClient(std::string const nickname);

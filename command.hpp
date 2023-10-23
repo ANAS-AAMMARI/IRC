@@ -55,7 +55,7 @@ public:
     void execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void trimString(std::string &str);
     int checkNickUser(std::map<int, Client> &client, std::string input, int who);
-    std::string removeSpaces(std::string &msg);
+    void removeSpaces(std::string &msg);
     static void fillListOfCommands();
     void toUpper(std::string &str);
     void sendToClient(const std::string &msg, int clientSocket);
