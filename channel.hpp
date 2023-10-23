@@ -27,7 +27,7 @@ public:
     std::string getName();
     void addClient(Client &client);
     void addAdmin(Client &client);
-    void removeClient(int index);
+    void removeClient(std::string const nickname);
     void sendToAllButOne(std::string msg, std::string nickname);
     void sendToAll(std::string msg);
     int checkNick(std::string nickname);

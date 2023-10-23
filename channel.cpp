@@ -32,8 +32,19 @@ void Channel::addClient(Client &client) {
     this->clients.push_back(client);
 }
 
-void Channel::removeClient(int index) {
-    this->clients.erase(this->clients.begin() + index);
+void Channel::removeClient(std::string const nickname) {
+    for (size_t i = 0; i < this->clients.size(); i++) {
+        if (this->clients[i].getNick() == nickname) {
+            this->clients.erase(this->clients.begin() + i);
+            return;
+        }
+    }
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        if (this->listofAdmins[i].getNick() == nickname) {
+            this->listofAdmins.erase(this->listofAdmins.begin() + i);
+            return;
+        }
+    }
 }
 
 void Channel::sendToAllButOne(std::string msg, std::string nickname) {

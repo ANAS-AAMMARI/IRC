@@ -454,6 +454,54 @@ void Command::INVITECommand(std::map<int, Client> &client, int index, std::map<i
     sendToClient(INVITE_SUCCESS_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
 }
 
+void Command::KICKCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(KICK_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 2)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "KICK"), client[index].getSocket());
+        return;
+    }
+    if (this->args[0][0] != '#')
+    {
+        sendToClient(KICK_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    int id = check_if_exist(this->args[0], channels);
+    if (id == -1)
+    {
+        sendToClient(KICK_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkNick(client[index].getNick()) == -1)
+    {
+        sendToClient(KICK_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkAdmin(client[index].getNick()) == -1)
+    {
+        sendToClient(KICK_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    int id2 = checkNickUser(client, this->args[1], 1);
+    if (id2 == -1)
+    {
+        sendToClient(KICK_NOSUCHNICK_MSG(client[index].getNick(), this->args[1]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkNick(this->args[1]) == -1)
+    {
+        sendToClient(KICK_USERNOTINCHANNEL_MSG(client[index].getNick(), this->args[1], this->args[0]), client[index].getSocket());
+        return;
+    }
+    channels[id].sendToAll(KICK_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[1], this->args[0]));
+    channels[id].removeClient(this->args[1]);
+}
+
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
@@ -501,6 +549,7 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
         case TOPIC:
             break;
         case KICK:
+            this->KICKCommand(client, index, channel);
             break;
         case INVITE:
             this->INVITECommand(client, index, channel);

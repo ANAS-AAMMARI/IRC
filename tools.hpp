@@ -37,10 +37,13 @@
 # define JOIN_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
 # define JOIN_MSG(nick, user, ip, chan) "" + nick + "!~" + user + "@" + ip + " JOIN " + chan + "\r\n"
 // error message Kick
+# define KICK_NOSUCHCHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
 # define KICK_CHANOPRIVSNEEDED_MSG(nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
 # define KICK_USERNOTINCHANNEL_MSG(user, nick, channel) ":ft_irc 441 " + user + " " + nick + " " + channel + " :They aren't on that channel\r\n"
 # define KICK_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
-
+# define KICK_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
+# define KICK_MSG(nick, user, ip, recipient, channel) "" + nick + "!~" + user + "@" + ip + " KICK " + channel + " " + recipient + " :" + recipient + "\r\n"
+# define KICK_NOSUCHNICK_MSG(nick, recipient) ":ft_irc 401 " + nick + " " + recipient + " :No such nick/channel\r\n"
 // error message PRIVMSG
 # define PRIVMSG_NOSUCHNICK_MSG(nick, recipient) ":ft_irc 401 " + nick + " " + recipient + " :No such nick/channel\r\n"
 # define PRIVMSG_CANNOTSENDTOCHAN_MSG(nick, recipient) ":ft_irc 404 " + nick + " " + recipient + " :Cannot send to channel\r\n"
