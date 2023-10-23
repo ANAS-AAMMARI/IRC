@@ -61,4 +61,12 @@
 # define INVITE_USERONCHANNEL_MSG(nick, recipient, channel) ":ft_irc 443 " + nick + " " + recipient + " " + channel + " :is already on channel\r\n"
 # define INVITE_MSG(nick, user, ip, recipient, channel) "" + nick + "!~" + user + "@" + ip + " INVITE " + recipient + " " + channel + "\r\n"
 # define INVITE_SUCCESS_MSG(nick, recipient, channel) ":ft_irc 341 " + nick + " " + recipient + " " + channel + "\r\n"
+
+// error message PART
+# define PART_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
+# define PART_NOSUCHCHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
+# define PART_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
+# define PART_MSG(nick, user, ip, channel) "" + nick + "!~" + user + "@" + ip + " PART " + channel + "\r\n"
+// error message MODE
+
 #endif // TOOL_HPP

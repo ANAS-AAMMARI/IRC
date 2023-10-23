@@ -502,6 +502,48 @@ void Command::KICKCommand(std::map<int, Client> &client, int index, std::map<int
     channels[id].removeClient(this->args[1]);
 }
 
+void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(PART_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 1)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "PART"), client[index].getSocket());
+        return;
+    }
+    std::stringstream ss(this->args[0]);
+    std::string getline;
+    std::vector<std::string> channelsName;
+    while (std::getline(ss, getline, ','))
+        channelsName.push_back(getline);
+    for (size_t i = 0; i < channelsName.size(); i++)
+    {
+        if (channelsName[i].empty())
+            continue;
+        if (channelsName[i][0] != '#')
+        {
+            sendToClient(PART_NOSUCHCHANNEL_MSG(client[index].getNick(), channelsName[i]), client[index].getSocket());
+            continue;
+        }
+        int id = check_if_exist(channelsName[i], channels);
+        if (id == -1)
+        {
+            sendToClient(PART_NOTONCHANNEL_MSG(client[index].getNick(), channelsName[i]), client[index].getSocket());
+            continue;
+        }
+        if (channels[id].checkNick(client[index].getNick()) == -1)
+        {
+            sendToClient(PART_NOTONCHANNEL_MSG(client[index].getNick(), channelsName[i]), client[index].getSocket());
+            continue;
+        }
+        channels[id].sendToAll(PART_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), channelsName[i]));
+        channels[id].removeClient(client[index].getNick());
+    }
+}
+
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
@@ -543,6 +585,7 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
             this->JOINCommand(client, index, channel);
             break;
         case PART:
+            this->PARTCommand(client, index, channel);
             break;
         case MODE:
             break;
