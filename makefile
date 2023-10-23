@@ -8,13 +8,15 @@ HEADER=	command.hpp \
 		server.hpp 	\
 		client.hpp	\
 		tools.hpp	\
-		channel.hpp	
+		channel.hpp	\
+		mode_opt.hpp
 
 SRC=	main.cpp \
 		command.cpp \
 		server.cpp	\
 		client.cpp	\
-		channel.cpp	
+		channel.cpp	\
+		mode_opt.cpp
 
 OBJ=$(SRC:.cpp=.o)
 

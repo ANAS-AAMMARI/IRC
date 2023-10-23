@@ -2,14 +2,23 @@
 
 Channel::Channel() {
     this->name = "";
+    this->pass_of_channel = "";
+    this->is_encrypted = false;
+    this->limit = 0;
 }
 
 Channel::Channel(std::string name) {
     this->name = name;
+    this->pass_of_channel = "";
+    this->is_encrypted = false;
+    this->limit = 0;
 }
 
 Channel& Channel::operator=(const Channel& other) {
     this->name = other.name;
+    this->pass_of_channel = other.pass_of_channel;
+    this->is_encrypted = other.is_encrypted;
+    this->limit = other.limit;
     return *this;
 }
 
@@ -103,6 +112,63 @@ std::string Channel::getClients() {
     return clients;
 }
 
+int Channel::getNumberOfClients() {
+    return this->clients.size() + this->listofAdmins.size();
+}
+
 void Channel::addAdmin(Client &client) {
     this->listofAdmins.push_back(client);
+}
+
+void Channel::setPass(std::string pass) {
+    this->pass_of_channel = pass;
+}
+
+std::string Channel::getPass() {
+    return this->pass_of_channel;
+}
+
+void Channel::setEncrypted(bool is_encrypted) {
+    this->is_encrypted = is_encrypted;
+}
+
+bool Channel::getEncrypted() {
+    return this->is_encrypted;
+}
+
+
+void Channel::setLimit(int limit) {
+    this->limit = limit;
+}
+
+int Channel::getLimit() {
+    return this->limit;
+}
+
+void Channel::addoperator(std::string nickname) {
+    for (size_t i = 0; i < this->clients.size(); i++) {
+        if (this->clients[i].getNick() == nickname) {
+            this->listofAdmins.push_back(this->clients[i]);
+            this->clients.erase(this->clients.begin() + i);
+            return;
+        }
+    }
+}
+
+void Channel::removeoperator(std::string nickname) {
+    for (size_t i = 0; i < this->listofAdmins.size(); i++) {
+        if (this->listofAdmins[i].getNick() == nickname) {
+            this->clients.push_back(this->listofAdmins[i]);
+            this->listofAdmins.erase(this->listofAdmins.begin() + i);
+            return;
+        }
+    }
+}
+
+void Channel::setInv_mode(bool inv_mode) {
+    this->inv_mode = inv_mode;
+}
+
+bool Channel::getInv_mode() {
+    return this->inv_mode;
 }

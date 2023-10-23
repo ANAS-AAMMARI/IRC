@@ -69,4 +69,15 @@
 # define PART_MSG(nick, user, ip, channel) "" + nick + "!~" + user + "@" + ip + " PART " + channel + "\r\n"
 // error message MODE
 
+// error message MODE
+# define MODE_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
+# define MODE_CHANOPRIVSNEEDED_MSG(nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
+# define MODE_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
+# define JOIN_BADCHANNELKEY_MSG(nick, channel) ":ft_irc 475 " + nick + " " + channel + " :Cannot join channel (+k)\r\n"
+# define MODE_NOSUCHCHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
+# define MODE_MSG(nick, channel) "" + nick + "!~" + channel + " MODE " + channel + "\r\n"
+
+
+# define JOIN_CHANNEL_ISFULL_MSG(nick, channel) ":ft_irc 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n"
+# define JOIN_INVITEONLY_MSG(nick, channel) ":ft_irc 471 " + nick + " " + channel + " :Cannot join channel (+i)\r\n"
 #endif // TOOL_HPP

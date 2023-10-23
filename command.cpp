@@ -111,25 +111,34 @@ void Command::trimString(std::string &str)
         str = str.substr(0, end + 1);
 }
 
-std::string Command::removeSpaces(std::string &msg)
+void Command::removeSpaces(std::string &msg)
 {
+    std::string temp = "";
     trimString(msg);
+    size_t index = msg.find(":");
+    if (index != std::string::npos)
+        temp = msg.substr(0, index);
+    else
+    {
+        temp = msg;
+        index  = msg.size();
+    }
+    trimString(temp);
     std::string result;
     bool previousIsSpace = false;
-    for (size_t i = 0; i < msg.size(); i++) {
-        if (std::isspace(msg[i])) {
+    for (size_t i = 0; i < temp.size(); i++) {
+        if (std::isspace(temp[i])) {
             if (!previousIsSpace) {
                 result += ' ';
             }
             previousIsSpace = true;
         } else {
-            result += msg[i];
+            result += temp[i];
             previousIsSpace = false;
         }
     }
-    return result;
+   this->msg = result + msg.substr(index);
 }
-
 void Command::toUpper(std::string &str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::toupper);
@@ -220,6 +229,37 @@ int Command::checkNickUser(std::map<int, Client> &client, std::string input, int
     return -1;
 }
 
+int Command::check_if_exist(std::string channel, std::map<int, Channel> &channels)
+{
+    std::map<int, Channel>::iterator it;
+    int i = 0;
+    for (it = channels.begin(); it != channels.end(); ++it)
+    {
+        if (it->second.getName() == channel)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
+void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
+{
+    this->commandHandler(client, index, channel);
+    if (!client[index].getIsValidPass())
+        return;
+    if (client[index].getNick().empty() || client[index].getUser().empty())
+        return;
+    client[index].setIsRegistered(true);
+    sendToClient(WELCOME_MSG(client[index].getNick(), getLoclalIp(), client[index].getUser()), client[index].getSocket());
+    sendToClient(YOURHOST_MSG(client[index].getNick(), getLoclalIp()), client[index].getSocket());
+    sendToClient(CREATED_MSG(client[index].getNick(), getCurrentDateTime()), client[index].getSocket());
+    sendToClient(MYINFO_MSG(client[index].getNick(), "+", "t"), client[index].getSocket());
+    sendToClient(ISUPPORT_MSG(client[index].getNick(), "PREFIX=(ov)@+ CHANTYPES=#&+ CHANMODES=,,,"), client[index].getSocket());
+}
+
+
+
+// PASS Command ***********************************************************
 void Command::PASSCommand(std::map<int, Client> &client, int index)
 {
     if (client[index].getIsRegistered())
@@ -240,6 +280,7 @@ void Command::PASSCommand(std::map<int, Client> &client, int index)
     client[index].setIsValidPass(true);
 }
 
+// NICK Command ***********************************************************
 void Command::NICKCommand(std::map<int, Client> &client, int index)
 {
     if (this->args.size() < 1)
@@ -268,6 +309,7 @@ void Command::NICKCommand(std::map<int, Client> &client, int index)
         sendToClient(NICK_MSG(oldNick, client[index].getNick(), client[index].getUser(), getLoclalIp()), client[index].getSocket());
 }
 
+// USER Command ***********************************************************
 void Command::USERCommand(std::map<int, Client> &client, int index)
 {
     if (client[index].getIsRegistered())
@@ -288,21 +330,7 @@ void Command::USERCommand(std::map<int, Client> &client, int index)
     client[index].setUser(this->args[0]);
 }
 
-void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
-{
-    this->commandHandler(client, index, channel);
-    if (!client[index].getIsValidPass())
-        return;
-    if (client[index].getNick().empty() || client[index].getUser().empty())
-        return;
-    client[index].setIsRegistered(true);
-    sendToClient(WELCOME_MSG(client[index].getNick(), getLoclalIp(), client[index].getUser()), client[index].getSocket());
-    sendToClient(YOURHOST_MSG(client[index].getNick(), getLoclalIp()), client[index].getSocket());
-    sendToClient(CREATED_MSG(client[index].getNick(), getCurrentDateTime()), client[index].getSocket());
-    sendToClient(MYINFO_MSG(client[index].getNick(), "+", "t"), client[index].getSocket());
-    sendToClient(ISUPPORT_MSG(client[index].getNick(), "PREFIX=(ov)@+ CHANTYPES=#&+ CHANMODES=,,,"), client[index].getSocket());
-}
-
+// PRIVMSG Command ***********************************************************
 void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
@@ -356,6 +384,7 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
     }
 }
 
+// JOIN Command ****************************************************************
 void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
     if (!client[index].getIsRegistered())
@@ -373,7 +402,6 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
     std::vector<std::string> recipients;
     while (std::getline(ss, getline, ','))
         recipients.push_back(getline);
-    
     for (size_t i = 0; i < recipients.size(); i++)
     {
         if (recipients[i].empty())
@@ -386,8 +414,32 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
         int id = check_if_exist(recipients[i], channels);
         if (id != -1)
         {
+            // this part need error msg *********************************************************
             if (channels[id].checkNick(client[index].getNick()) != -1)
                 continue;
+            if (channels[id].getInv_mode() == true && client[index].getInveted() == false)
+            {
+                sendToClient(JOIN_INVITEONLY_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                continue;
+            }
+            if (channels[id].getEncrypted() == true)
+            {
+                if (args.size() < 2)
+                {
+                    sendToClient("NEED PASS\n", client[index].getSocket());
+                    return;
+                }
+                if (args.size() >= 2  && args[1] != channels[id].getPass())
+                {
+                    sendToClient("WRONG PASS\n", client[index].getSocket());
+                    return;
+                }
+            }
+            if (channels[id].getLimit() != 0 && channels[id].getLimit() <= channels[id].getNumberOfClients())
+            {
+                sendToClient(JOIN_CHANNEL_ISFULL_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                continue;
+            }
             channels[id].addClient(client[index]);
             channels[id].sendToAll(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]));
             sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[id].getClients()), client[index].getSocket());
@@ -406,6 +458,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
     
 }
 
+// INVITE Command ****************************************************************
 void Command::INVITECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
     if (!client[index].getIsRegistered())
@@ -450,10 +503,12 @@ void Command::INVITECommand(std::map<int, Client> &client, int index, std::map<i
         sendToClient(INVITE_USERONCHANNEL_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
         return;
     }
+    client[id].setInveted(true);
     sendToClient(INVITE_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[id].getSocket());
     sendToClient(INVITE_SUCCESS_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
 }
 
+// KICK Command ****************************************************************
 void Command::KICKCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
     if (!client[index].getIsRegistered())
@@ -502,6 +557,7 @@ void Command::KICKCommand(std::map<int, Client> &client, int index, std::map<int
     channels[id].removeClient(this->args[1]);
 }
 
+// PART Command ****************************************************************
 void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
     if (!client[index].getIsRegistered())
@@ -544,25 +600,65 @@ void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int
     }
 }
 
+// MODE Command ****************************************************************
+void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(MODE_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 2)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "MODE"), client[index].getSocket());
+        return;
+    }
+    int id = check_if_exist(this->args[0], channels);
+    if (id == -1)
+    {
+        sendToClient(MODE_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkNick(client[index].getNick()) == -1)
+    {
+        sendToClient(MODE_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkAdmin(client[index].getNick()) == -1)
+    {
+        sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    // this part need to be changed (ERROR MSG...)******************************************
+    if (args[1] == "k" || args[1] == "-k" || args[1] == "+k")
+    {
+        mode_k(args, channels[id], client[index].getNick(), client[index].getSocket());
+        return;
+    }
+    if (args[1] == "l" || args[1] == "-l" || args[1] == "+l")
+    {
+        mode_l(args, channels[id], client[index].getNick(), client[index].getSocket());
+        return;
+    }
+    if (args[1] == "o" || args[1] == "-o" || args[1] == "+o")
+    {
+        mode_o(args, channels[id], client[index].getNick(), client[index].getSocket());
+        return;
+    }
+    if (args[1] == "i" || args[1] == "-i" || args[1] == "+i")
+    {
+        mode_i(args, channels[id], client[index].getNick(), client[index].getSocket());
+        return;
+    }
+    sendToClient("Command Done not implemented", client[index].getSocket());
+}
+
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
     if (!client[index].getIsRegistered())
         this->registerClient(client, index, channel);
     else
         this->commandHandler(client, index, channel);
-}
-
-int Command::check_if_exist(std::string channel, std::map<int, Channel> &channels)
-{
-    std::map<int, Channel>::iterator it;
-    int i = 0;
-    for (it = channels.begin(); it != channels.end(); ++it)
-    {
-        if (it->second.getName() == channel)
-            return i;
-        i++;
-    }
-    return -1;
 }
 
 void Command::commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
@@ -588,8 +684,10 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
             this->PARTCommand(client, index, channel);
             break;
         case MODE:
+            this->MODECommand(client, index, channel);
             break;
         case TOPIC:
+            //this->TOPICCommand(client, index, channel);
             break;
         case KICK:
             this->KICKCommand(client, index, channel);

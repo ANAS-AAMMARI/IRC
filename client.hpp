@@ -16,7 +16,7 @@ private:
     std::string password;
     bool isRegistered;
     bool isValidPass;
-
+    bool isInveted;
 public:
     Client();
     Client(int socket, std::string password);
@@ -39,6 +39,8 @@ public:
     void setIsRegistered(bool isRegistered);
     void setIsValidPass(bool isValidPass);
 
+    void setInveted(bool isInveted);
+    bool getInveted();
 };
 
 #endif // CLIENT_HPP
