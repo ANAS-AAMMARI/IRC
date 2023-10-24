@@ -633,7 +633,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     // this part need to be changed (ERROR MSG...)******************************************
     int size = this->args[1].size();
     bool    is_minus = false;
-    int count = 1;
+    size_t count = 1;
    for (int j = 0; j < size; j++)
         {
             if (args[1][j] == '+' || args[1][j] == 'i')

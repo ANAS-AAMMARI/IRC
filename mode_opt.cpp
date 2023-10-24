@@ -52,7 +52,7 @@ void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nic
 
 
 // option kkkkkkkkkkkk********************************************************************
-void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, int &count)
+void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, size_t &count)
 {
     nick = "";
     if (args.size() >= 1 + count)
@@ -63,7 +63,7 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
                 return;
             channel.setPass(args[1 + count]);
             channel.setEncrypted(true);
-            channel.sendToAll("MODE : " + args[1] + " Done, Now channel is encrypted\n");
+            channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is encrypted\n");
             count++;
             return;
         }
@@ -73,7 +73,7 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
             {
                 channel.setPass("");
                 channel.setEncrypted(false);
-                channel.sendToAll("MODE : " + args[1] + " Done, Now channel is not encrypted\n");
+                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is not encrypted\n");
                 count++;
                 return;
             }
@@ -85,7 +85,7 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
 
 
 // option oooooooooooooo************************************************************************
-void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, int &count)
+void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, size_t &count)
 {
     nick = "";
     if (args.size() >= 1 + count)
@@ -94,18 +94,18 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nic
         {
             if (channel.checkAdmin(args[1 + count]) != -1)
             {
-                sendToclient("MODE : " + args[1] + " is already an operator\n", socket);
+                sendToclient("MODE : " + args[1 + count] + " is already an operator\n", socket);
                 count++;
                 return;
             }
             if (channel.checkNick(args[1 + count]) != -1)
             {
                 channel.addoperator(args[1 + count]);
-                channel.sendToAll("MODE : " + args[1] + " Done, Now channel have one more operator\n");
+                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel have one more operator\n");
                 count++;
                 return;
             }
-            sendToclient("MODE : " + args[1] + " is not on channel\n", socket);
+            sendToclient("MODE : " + args[1 + count] + " is not on channel\n", socket);
             count++;
             return;
         }
@@ -114,17 +114,17 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nic
             if (channel.checkAdmin(args[1 + count]) != -1)
             {
                 channel.removeoperator(args[1 + count]);
-                channel.sendToAll("MODE : " + args[1 ] + " Done, Now channel have -1 operator\n");
+                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel have -1 operator\n");
                 count++;
                 return;
             }
             if (channel.checkNick(args[1 + count]) != -1)
             {
-                sendToclient("MODE : " + args[1] + " is not an operator\n", socket);
+                sendToclient("MODE : " + args[1 + count] + " is not an operator\n", socket);
                 count++;
                 return;
             }
-            sendToclient("MODE : " + args[1] + " is not on channel\n", socket);
+            sendToclient("MODE : " + args[1 + count] + " is not on channel\n", socket);
             count++;
             return;
         }
@@ -133,7 +133,7 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nic
 }
 
 // option llllllllllllllllllllllllllll***********************************************************
-void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, int &count)
+void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, size_t &count)
 {
     nick = "";
     if (args.size() >= 1 + count)
@@ -141,7 +141,7 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nic
         if (is_munis == false)
         {
             channel.setLimit(atoi(args[1 + count].c_str()));
-            channel.sendToAll("MODE : " + args[1] + " Done, Now channel is limited\n");
+            channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is limited\n");
             count++;
             return;
         }
@@ -150,7 +150,7 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nic
             if (args[2].empty())
             {
                 channel.setLimit(0);
-                channel.sendToAll("MODE : " + args[1] + " Done, Now channel is not limited\n");
+                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is not limited\n");
                 count++;
                 return;
             }
