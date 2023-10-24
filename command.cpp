@@ -1,4 +1,6 @@
 #include "command.hpp"
+#include <ctime>
+#include <cstdio>
 
 std::vector<std::string> Command::listOfCommands;
 
@@ -19,6 +21,7 @@ void Command::fillListOfCommands()
     Command::listOfCommands.push_back("TOPIC");
     Command::listOfCommands.push_back("KICK");
     Command::listOfCommands.push_back("INVITE");
+    Command::listOfCommands.push_back("BOT");
 }
 
 Command::Command(std::string msg, std::map<int, Client> &client, int index)
@@ -628,28 +631,40 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         return;
     }
     // this part need to be changed (ERROR MSG...)******************************************
-    if (args[1] == "k" || args[1] == "-k" || args[1] == "+k")
-    {
-        mode_k(args, channels[id], client[index].getNick(), client[index].getSocket());
-        return;
-    }
-    if (args[1] == "l" || args[1] == "-l" || args[1] == "+l")
-    {
-        mode_l(args, channels[id], client[index].getNick(), client[index].getSocket());
-        return;
-    }
-    if (args[1] == "o" || args[1] == "-o" || args[1] == "+o")
-    {
-        mode_o(args, channels[id], client[index].getNick(), client[index].getSocket());
-        return;
-    }
-    if (args[1] == "i" || args[1] == "-i" || args[1] == "+i")
-    {
-        mode_i(args, channels[id], client[index].getNick(), client[index].getSocket());
-        return;
-    }
-    sendToClient("Command Done not implemented", client[index].getSocket());
+    int size = this->args[1].size();
+    bool    is_minus = false;
+    int count = 1;
+   for (int j = 0; j < size; j++)
+        {
+            if (args[1][j] == '+' || args[1][j] == 'i')
+            {
+                if (args[1][j] == 'i')
+                    mode_i(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus);
+                continue;
+            }
+            if (args[1][j] == '-')
+            {
+                is_minus = true;
+                continue;
+            }
+            if (args[1][j] == 'l')
+            {
+                mode_l(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus, count);
+                continue;
+            }
+            if (args[1][j] == 'k')
+            {
+                mode_k(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus, count);
+                continue;
+            }
+            if (args[1][j] == 'o')
+            {
+                mode_o(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus, count);
+                continue;
+            }
+        }
 }
+
 
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
@@ -697,3 +712,119 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
             break;
     }
 }
+
+/*void    Command::BOTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (channels.size() == 0)
+    {
+        void();        
+    }
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient("you are not registered\n", client[index].getSocket());
+        return;
+    }
+    std::string msg = "Welcome to this bot, i have the following commands:\n";
+    msg += "[1] - birthday\n";
+    msg += "[2] - mini_game\n";
+    msg += "[3] - bye\n";
+    msg += "please enter the number of the command you want to execute : ";
+    sendToClient(msg, client[index].getSocket());
+    while (true)
+    {
+        std::string _cmd;
+        int cmd = 0;
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        int messageSize = recv(client[index].getSocket(), buffer, sizeof(buffer), 0);
+        if (messageSize < 0)
+        {
+            sendToClient("error\n", client[index].getSocket());
+            break;
+        }
+        //std::string _cmd(buffer);
+        cmd = atoi(_cmd.c_str());
+        if (cmd < 1 || cmd > 3)
+        {
+            sendToClient("please enter a valid command\n", client[index].getSocket());
+            continue;
+        }
+        if (cmd == 1)
+        {
+            std::string msg = "please enter your birthday (dd/mm/yyyy) : ";
+            sendToClient(msg, client[index].getSocket());
+            char buffer[1024];
+            recv(client[index].getSocket(), buffer, 1024, 0);
+            std::string birthday(buffer);
+            int age = get_ur_age(birthday);
+            if (age == -1)
+            {
+                sendToClient("please enter a valid birthday\n", client[index].getSocket());
+                continue;
+            }
+            std::string msg2 = "your age is : " + std::to_string(age) + "\n";
+            //std::string msg2 = "your birthday is : " + birthday + "\n";
+            sendToClient(msg2, client[index].getSocket());
+        }
+        if (cmd == 2)
+        {
+            sendToClient("Not ready yet\n", client[index].getSocket());
+        }
+        if (cmd == 3)
+        {
+            sendToClient("bye bye, see you soon :)\n", client[index].getSocket());
+            break;
+        }
+    }
+    return;
+}
+
+int calculateAge(int birthdate_month, int birthdate_day, int birthdate_year) {
+    time_t currentTime;
+    struct tm *localTime;
+    time(&currentTime);
+    localTime = localtime(&currentTime);
+
+    int currentYear = localTime->tm_year + 1900;
+    int currentMonth = localTime->tm_mon + 1;
+    int currentDay = localTime->tm_mday;
+
+    int age = currentYear - birthdate_year;
+
+    // Check if the birthdate has occurred this year
+    if (currentMonth < birthdate_month || (currentMonth == birthdate_month && currentDay < birthdate_day)) {
+        age--;
+    }
+    return age;
+}
+
+
+int Command::get_ur_age(std::string &str)
+{
+    if (str.size() != 10)
+        return -1;
+    int _day = str.find('/');
+    int _month = str.find('/', _day + 1);
+    std::string day = str.substr(0, _day);
+    std::string month = str.substr(_day + 1, _month - _day - 1);
+    std::string year = str.substr(_month + 1, str.size() - _month - 1);
+    if (day.size() != 2 || month.size() != 2 || year.size() != 4)
+        return -1;
+    if (day.find_first_not_of("0123456789") != std::string::npos || month.find_first_not_of("0123456789") != std::string::npos || year.find_first_not_of("0123456789") != std::string::npos)
+        return -1;
+    int day_int = std::stoi(day);
+    int month_int = std::stoi(month);
+    int year_int = std::stoi(year);
+    if (day_int > 31 || day_int < 1 || month_int > 12 || month_int < 1 || year_int < 0 || year_int > 9999)
+        return -1;
+    if (month_int == 4 || month_int == 6 || month_int == 9 || month_int == 11)
+        if (day_int > 30)
+    if (month_int == 2 && year_int % 4 != 0)
+        if (day_int > 28)
+            return -1;
+    if (month_int == 2 && year_int % 4 == 0)
+        if (day_int > 29)
+            return -1;
+    int age = calculateAge(month_int, day_int, year_int);
+    return age;
+}*/
