@@ -15,4 +15,5 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nic
 void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nick, int socket);
 void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nick, int socket);
 
+//void    mode_t(std::vector<std::string> &args, Channel &channel, std::string nick, int socket);
 #endif

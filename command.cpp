@@ -257,8 +257,6 @@ void Command::registerClient(std::map<int, Client> &client, int index, std::map<
     sendToClient(ISUPPORT_MSG(client[index].getNick(), "PREFIX=(ov)@+ CHANTYPES=#&+ CHANMODES=,,,"), client[index].getSocket());
 }
 
-
-
 // PASS Command ***********************************************************
 void Command::PASSCommand(std::map<int, Client> &client, int index)
 {
