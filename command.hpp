@@ -76,7 +76,7 @@ public:
     void INVITECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void PARTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
-    //void TOPICCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    void TOPICCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void KICKCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
 
 

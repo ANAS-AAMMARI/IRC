@@ -1,5 +1,24 @@
 #include "mode_opt.hpp"
 
+static std::string getLocalIP()
+{
+    char hostname[1024];
+    if (gethostname(hostname, sizeof(hostname)) != 0) {
+        return "NULL";
+    }
+    
+    struct hostent *host = gethostbyname(hostname);
+    if (host == NULL) {
+        return "NULL";
+    }
+    
+    char* ipAddress = inet_ntoa(*(struct in_addr *)host->h_addr);
+    if (ipAddress == NULL) {
+        return "NULL";
+    }
+    return std::string(ipAddress);
+}
+
 void sendToclient(const std::string &msg, int clientSocket)
 {
     send(clientSocket, msg.c_str(), msg.size(), 0);
@@ -8,23 +27,20 @@ void sendToclient(const std::string &msg, int clientSocket)
 // option of MODE COMMAND
 
 // option iiiiiiiiiiiiiiiiiiii ****************************************************************************
-void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis)
+void    mode_i(Channel &channel, Client client, bool &is_munis)
 {
-    nick = "";
-    socket = 0;
     if (is_munis == false)
-        {
-            channel.setInv_mode(true);
-            channel.sendToAll("MODE : " + args[1] + " Done, Now channel invite only mode\n");
-            return;
-        }
+    {
+        channel.setInv_mode(true);
+        channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+i"));
+        return;
+    }
     if (is_munis == true) 
-        {   
-            
-            channel.setInv_mode(false);
-            channel.sendToAll("MODE : " + args[1] + " Done, Now channel is not invite only mode\n");
-            return;
-        }
+    {   
+        channel.setInv_mode(false);
+        channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-i"));
+        return;
+    }
 }
 
 // option ttttttttt***************************************************************************
@@ -50,9 +66,8 @@ void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nic
 
 
 // option kkkkkkkkkkkk********************************************************************
-void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis, size_t &count)
+void    mode_k(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count)
 {
-    nick = "";
     if (args.size() >= 1 + count)
     {
         if (is_munis == false)
@@ -61,7 +76,7 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
                 return;
             channel.setPass(args[1 + count]);
             channel.setEncrypted(true);
-            channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is encrypted\n");
+            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+k"));
             count++;
             return;
         }
@@ -71,21 +86,20 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
             {
                 channel.setPass("");
                 channel.setEncrypted(false);
-                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is not encrypted\n");
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-k"));
                 count++;
                 return;
             }
         }
     }
-    sendToclient(" need more arguments(pass)\n", socket);
+    sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
 }
 
 
 
 // option oooooooooooooo************************************************************************
-void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis, size_t &count)
+void    mode_o(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count)
 {
-    nick = "";
     if (args.size() >= 1 + count)
     {
         if (is_munis == false)
@@ -94,18 +108,17 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nic
                 return;
             if (channel.checkAdmin(args[1 + count]) != -1)
             {
-                sendToclient("MODE : " + args[1 + count] + " is already an operator\n", socket);
                 count++;
                 return;
             }
             if (channel.checkNick(args[1 + count]) != -1)
             {
                 channel.addoperator(args[1 + count]);
-                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel have one more operator\n");
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+o"));
                 count++;
                 return;
             }
-            sendToclient("MODE : " + args[1 + count] + " is not on channel\n", socket);
+            sendToclient(MODE_NOTONCHANNEL_MSG(client.getNick(), channel.getName()), client.getSocket());
             count++;
             return;
         }
@@ -114,28 +127,27 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nic
             if (channel.checkAdmin(args[1 + count]) != -1)
             {
                 channel.removeoperator(args[1 + count]);
-                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel have -1 operator\n");
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-o"));
                 count++;
                 return;
             }
             if (channel.checkNick(args[1 + count]) != -1)
             {
-                sendToclient("MODE : " + args[1 + count] + " is not an operator\n", socket);
+                sendToclient(MODE_CHANOPRIVSNEEDED_MSG(client.getNick(), channel.getName()), client.getSocket());
                 count++;
                 return;
             }
-            sendToclient("MODE : " + args[1 + count] + " is not on channel\n", socket);
+            sendToclient(MODE_NOTONCHANNEL_MSG(client.getNick(), channel.getName()), client.getSocket());
             count++;
             return;
         }
-        sendToclient(" need more arguments(operator)\n", socket);
+        sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
     }
 }
 
 // option llllllllllllllllllllllllllll***********************************************************
-void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis, size_t &count)
+void    mode_l(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count)
 {
-    nick = "";
     if (args.size() >= 1 + count)
     {
         if (is_munis == false)
@@ -143,22 +155,22 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nic
             if (args[1 + count].empty())
                 return;
             channel.setLimit(atoi(args[1 + count].c_str()));
-            channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is limited\n");
+            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+l"));
             count++;
             return;
         }
-        if (is_munis == true) 
+        if (is_munis == true)
         {   
             if (args[1 + count] == ":")
             {
                 channel.setLimit(0);
-                channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is not limited\n");
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-l"));
                 count++;
                 return;
             }
         }
     }
-    sendToclient(" need more arguments(limit)\n", socket);
+    sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
 }
 
 /*  if (args[1] == "k" || args[1] == "-k" || args[1] == "+k")

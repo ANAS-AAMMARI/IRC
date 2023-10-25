@@ -431,25 +431,20 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
                 continue;
             if (channels[id].getInv_mode() == true && channels[id].checkInvited(client[index].getNick()) == -1)
             {
-                sendToClient(JOIN_INVITEONLY_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                sendToClient(JOIN_INVITE_ONLY_CHAN_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                 continue;
             }
             if (channels[id].getEncrypted() == true)
             {
-                if (args.size() < 2)
+                if (args.size() < 2 || (args.size() >= 2  && args[1] != channels[id].getPass()))
                 {
-                    sendToClient("NEED PASS\n", client[index].getSocket());
-                    return;
-                }
-                if (args.size() >= 2  && args[1] != channels[id].getPass())
-                {
-                    sendToClient("WRONG PASS\n", client[index].getSocket());
+                    sendToClient(JOIN_BAD_CHANNEL_KEY_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                     return;
                 }
             }
             if (channels[id].getLimit() != 0 && channels[id].getLimit() <= channels[id].getNumberOfClients())
             {
-                sendToClient(JOIN_CHANNEL_ISFULL_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                sendToClient(JOIN_CHANNEL_IS_FULL_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                 continue;
             }
             channels[id].addClient(client[index]);
@@ -612,6 +607,65 @@ void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int
     }
 }
 
+// TOPIC Command ****************************************************************
+void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
+{
+    if (!client[index].getIsRegistered())
+    {
+        sendToClient(TOPIC_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
+        return;
+    }
+    if (this->args.size() < 1)
+    {
+        sendToClient(REQUIRED_MSG(client[index].getNick(), "TOPIC"), client[index].getSocket());
+        return;
+    }
+    int id = check_if_exist(this->args[0], channels);
+    if (id == -1)
+    {
+        sendToClient(TOPIC_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkNick(client[index].getNick()) == -1)
+    {
+        sendToClient(TOPIC_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (channels[id].checkAdmin(client[index].getNick()) != -1)
+    {
+        if (this->args.size() < 2)
+        {
+            if (channels[id].getTopic().empty())
+                sendToClient(TOPIC_NOTOPIC_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            else
+                sendToClient(TOPIC_MSG(client[index].getNick(), this->args[0], channels[id].getTopic()), client[index].getSocket());
+            return;
+        }
+        if (this->args[1].empty())
+        {
+            channels[id].setTopic("");
+            channels[id].sendToAll(TOPIC_MSG(client[index].getNick(), this->args[0], ""));
+            return;
+        }
+        channels[id].setTopic(this->args[1]);
+        channels[id].sendToAll(TOPIC_MSG(client[index].getNick(), this->args[0], this->args[1]));
+    }
+    else
+    {
+        if (this->args.size() < 2)
+        {
+            if (channels[id].getTopic().empty())
+                sendToClient(TOPIC_NOTOPIC_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            else
+                sendToClient(TOPIC_MSG(client[index].getNick(), this->args[0], channels[id].getTopic()), client[index].getSocket());
+            return;
+        }
+        sendToClient(TOPIC_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+
+}
+
 // MODE Command ****************************************************************
 void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
@@ -650,7 +704,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
             if (args[1][j] == '+' || args[1][j] == 'i')
             {
                 if (args[1][j] == 'i')
-                    mode_i(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus);
+                    mode_i(channel[id], client[index], is_minus);
                 continue;
             }
             if (args[1][j] == '-')
@@ -660,18 +714,23 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
             }
             if (args[1][j] == 'l')
             {
-                mode_l(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus, count);
+                mode_l(args, channels[id], client[index], is_minus, count);
                 continue;
             }
             if (args[1][j] == 'k')
             {
-                mode_k(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus, count);
+                mode_k(args, channels[id], client[index], is_minus, count);
                 continue;
             }
             if (args[1][j] == 'o')
             {
-                mode_o(args, channels[id], client[index].getNick(), client[index].getSocket(), is_minus, count);
+                mode_o(args, channels[id], client[index], is_minus, count);
                 continue;
+            }
+            else
+            {
+                sendToClient(MODE_BADCHANMODE_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+                return;
             }
         }
 }
@@ -711,7 +770,7 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
             this->MODECommand(client, index, channel);
             break;
         case TOPIC:
-            //this->TOPICCommand(client, index, channel);
+            this->TOPICCommand(client, index, channel);
             break;
         case KICK:
             this->KICKCommand(client, index, channel);

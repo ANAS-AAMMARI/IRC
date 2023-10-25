@@ -1,6 +1,7 @@
 #include "channel.hpp"
 
 Channel::Channel() {
+    this->topic = "";
     this->name = "";
     this->pass_of_channel = "";
     this->is_encrypted = false;
@@ -9,6 +10,7 @@ Channel::Channel() {
 }
 
 Channel::Channel(std::string name) {
+    this->topic = "";
     this->name = name;
     this->pass_of_channel = "";
     this->is_encrypted = false;
@@ -17,6 +19,7 @@ Channel::Channel(std::string name) {
 }
 
 Channel& Channel::operator=(const Channel& other) {
+    this->topic = other.topic;
     this->name = other.name;
     this->pass_of_channel = other.pass_of_channel;
     this->is_encrypted = other.is_encrypted;
@@ -37,6 +40,14 @@ void Channel::setName(std::string name) {
 
 std::string Channel::getName() {
     return this->name;
+}
+
+void Channel::setTopic(std::string topic) {
+    this->topic = topic;
+}
+
+std::string Channel::getTopic() {
+    return this->topic;
 }
 
 void Channel::addClient(Client &client) {
