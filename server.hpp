@@ -40,6 +40,7 @@ public:
     ~Server();
     void run();
     void setPort(long long port);
+    std::vector<struct pollfd> getPollfds();
 };
 
 bool isNumber(std::string str);

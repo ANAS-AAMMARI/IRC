@@ -33,6 +33,7 @@ enum Commands{
 };
 
 class Channel;
+class Server;
 
 class Command {
 private:
@@ -56,7 +57,7 @@ public:
     void setIndexOfCommand(int index);
 
     void parse(Client &client);
-    void execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    void execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
     void trimString(std::string &str);
     int checkNickUser(std::map<int, Client> &client, std::string input, int who);
     void removeSpaces(std::string &msg);
@@ -65,8 +66,8 @@ public:
     void sendToClient(const std::string &msg, int clientSocket);
     std::string getCurrentDateTime();
     std::string getLoclalIp();
-    void registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
-    void commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    void registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
+    void commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
 
     bool checkNick(const std::string &nick);
     int  check_if_exist(std::string chan, std::map<int, Channel> &channels);
@@ -80,6 +81,7 @@ public:
     void MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void TOPICCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void KICKCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    void QUITCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
 
 
     void BOTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);

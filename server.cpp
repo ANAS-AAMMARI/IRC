@@ -37,6 +37,11 @@ void Server::setPort(long long port)
     this->port = port;
 }
 
+std::vector<struct pollfd> Server::getPollfds()
+{
+    return this->pollfds;
+}
+
 void Server::run()
 {
     // Create socket
@@ -157,13 +162,7 @@ void Server::handleNewConnection()
     clients[clientSocket] = newClient;
 
     // Send welcome message
-    std::string welcomeMessage = "Welcome to the chat server, you are client number : " + std::to_string(newClient.getSocket() - 3) + "\n";
-    if (send(clientSocket, welcomeMessage.c_str(), welcomeMessage.size(), 0) < 0)
-    {
-        std::cerr << "Error sending welcome message" << std::endl;
-        close(clientSocket);
-        exit(EXIT_FAILURE);
-    }
+    std::cout << "client with socket number " << clientSocket << " connected" << std::endl;
 }
 
 void Server::handelClientMessage(int clientSocket)
@@ -183,14 +182,14 @@ void Server::handelClientMessage(int clientSocket)
     {
         std::string message(buffer);
         Command command(message, clients, clientSocket);
-        command.execute(clients, clientSocket, channels);
+        command.execute(clients, clientSocket, channels, *this);
     }
 }
 
 void Server::handleClientDisconnection(int clientSocket)
 {
 
-    std::cout << "Client Number "<< clientSocket - 3 << " disconnected"<< std::endl;
+    std::cout << "Client with socket number " << clientSocket << " disconnected" << std::endl;
     // Close client socket
     close(clientSocket);
 

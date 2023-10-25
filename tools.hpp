@@ -84,4 +84,8 @@
 # define TOPIC_MSG(nick, channel, topic) ":ft_irc 332 " + nick + " " + channel + " :" + topic + "\r\n"
 # define TOPIC_WHOTIME_MSG(nick, channel, topic, time) ":ft_irc 333 " + nick + " " + channel + " " + topic + " " + time + "\r\n"
 
+// error message QUIT
+# define QUIT_MSG(nick, user, ip) ":" + nick + "!~" + user + "@" + ip + " QUIT :Client Quit\r\n"
+# define QUIT_ERROR_MSG(ip) "ERROR :Closing Link: " + ip + " (Client Quit)\r\n"
+
 #endif // TOOL_HPP

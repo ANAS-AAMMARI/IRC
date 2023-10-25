@@ -21,6 +21,8 @@ void Command::fillListOfCommands()
     Command::listOfCommands.push_back("TOPIC");
     Command::listOfCommands.push_back("KICK");
     Command::listOfCommands.push_back("INVITE");
+    Command::listOfCommands.push_back("PONG");
+    Command::listOfCommands.push_back("QUIT");  
     Command::listOfCommands.push_back("BOT");
 }
 
@@ -264,9 +266,9 @@ int Command::check_if_exist(std::string channel, std::map<int, Channel> &channel
     return -1;
 }
 
-void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
+void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
-    this->commandHandler(client, index, channel);
+    this->commandHandler(client, index, channel, server);
     if (!client[index].getIsValidPass())
         return;
     if (client[index].getNick().empty() || client[index].getUser().empty())
@@ -674,6 +676,33 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
     }
 }
 
+// QUIT Command ****************************************************************
+void Command::QUITCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server)
+{
+    sendToClient(QUIT_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp()), client[index].getSocket());
+    for (std::map<int, Channel>::iterator it = channels.begin(); it != channels.end(); it++)
+    {
+        if (it->second.checkNick(client[index].getNick()) != -1)
+        {
+            it->second.removeClient(client[index].getNick());
+            it->second.sendToAll(QUIT_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp()));
+        }
+    }
+    sendToClient(QUIT_ERROR_MSG(this->getLoclalIp()), client[index].getSocket());
+    std::cout << "Client with socket number " << client[index].getSocket() << " disconnected" << std::endl;
+    close(client[index].getSocket());
+    client.erase(client[index].getSocket());
+    std::vector<struct pollfd> tmp = server.getPollfds();
+    for (size_t i = 0; i < tmp.size(); i++)
+    {
+        if (tmp[i].fd == client[index].getSocket())
+        {
+            tmp.erase(tmp.begin() + i);
+            break;
+        }
+    }
+}
+
 // MODE Command ****************************************************************
 void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
@@ -743,15 +772,15 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     }
 }
 
-void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
+void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
     if (!client[index].getIsRegistered())
-        this->registerClient(client, index, channel);
+        this->registerClient(client, index, channel, server);
     else
-        this->commandHandler(client, index, channel);
+        this->commandHandler(client, index, channel, server); 
 }
 
-void Command::commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
+void Command::commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
     switch (this->indexOfCommand)
     {
@@ -784,6 +813,11 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
         break;
     case INVITE:
         this->INVITECommand(client, index, channel);
+        break;
+    case PONG:
+        break;
+    case QUIT:
+        this->QUITCommand(client, index, channel, server);
         break;
     default:
         break;
