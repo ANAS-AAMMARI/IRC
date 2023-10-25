@@ -86,20 +86,23 @@ void Command::setIndexOfCommand(int index)
 std::string Command::getLoclalIp()
 {
     char hostname[1024];
-    if (gethostname(hostname, sizeof(hostname)) != 0) {
+    if (gethostname(hostname, sizeof(hostname)) != 0)
+    {
         return "NULL";
     }
-    
+
     struct hostent *host = gethostbyname(hostname);
-    if (host == NULL) {
+    if (host == NULL)
+    {
         return "NULL";
     }
-    
-    char* ipAddress = inet_ntoa(*(struct in_addr *)host->h_addr);
-    if (ipAddress == NULL) {
+
+    char *ipAddress = inet_ntoa(*(struct in_addr *)host->h_addr);
+    if (ipAddress == NULL)
+    {
         return "NULL";
     }
-    
+
     return std::string(ipAddress);
 }
 
@@ -124,24 +127,29 @@ void Command::removeSpaces(std::string &msg)
     else
     {
         temp = msg;
-        index  = msg.size();
+        index = msg.size();
     }
-    //std::cout<<"------temp = "<<temp<<std::endl;
-    // trimString(temp);
+    // std::cout<<"------temp = "<<temp<<std::endl;
+    //  trimString(temp);
     std::string result;
     bool previousIsSpace = false;
-    for (size_t i = 0; i < temp.size(); i++) {
-        if (std::isspace(temp[i])) {
-            if (!previousIsSpace) {
+    for (size_t i = 0; i < temp.size(); i++)
+    {
+        if (std::isspace(temp[i]))
+        {
+            if (!previousIsSpace)
+            {
                 result += ' ';
             }
             previousIsSpace = true;
-        } else {
+        }
+        else
+        {
             result += temp[i];
             previousIsSpace = false;
         }
     }
-   this->msg = result + msg.substr(index);
+    this->msg = result + msg.substr(index);
 }
 void Command::toUpper(std::string &str)
 {
@@ -152,8 +160,8 @@ void Command::parse(Client &client)
 {
     std::string temp;
     this->removeSpaces(this->msg);
-    //std::cout<<"msg = "<<this->msg<<std::endl;
-    //std::cout<<"************"<<std::endl;
+    // std::cout<<"msg = "<<this->msg<<std::endl;
+    // std::cout<<"************"<<std::endl;
     std::stringstream ss(this->msg);
     std::getline(ss, temp, ' ');
     this->toUpper(temp);
@@ -350,7 +358,7 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
         sendToClient(PRIVMSG_NOTREGISTERED(client[index].getNick()), client[index].getSocket());
         return;
     }
-   
+
     if (this->args.size() < 2)
     {
         if (this->args.size() < 1)
@@ -379,8 +387,9 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
                     return;
                 }
                 channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(),
-                    client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
-            }    
+                                                             client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]),
+                                            client[index].getNick());
+            }
             else
                 sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
@@ -389,7 +398,8 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
             int id = checkNickUser(client, recipients[i], 1);
             if (id != -1)
                 sendToClient(PRIVMSG_AWAY_MSG(client[index].getNick(),
-                    client[index].getUser(), getLoclalIp(), recipients[i], this->args[1]), client[id].getSocket());
+                                              client[index].getUser(), getLoclalIp(), recipients[i], this->args[1]),
+                             client[id].getSocket());
             else
                 sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
@@ -418,7 +428,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
     {
         if (recipients[i].empty())
             continue;
-         if (recipients[i][0] != '#')
+        if (recipients[i][0] != '#')
         {
             sendToClient(JOIN_NO_SUCH_CHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
             continue;
@@ -436,7 +446,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
             }
             if (channels[id].getEncrypted() == true)
             {
-                if (args.size() < 2 || (args.size() >= 2  && args[1] != channels[id].getPass()))
+                if (args.size() < 2 || (args.size() >= 2 && args[1] != channels[id].getPass()))
                 {
                     sendToClient(JOIN_BAD_CHANNEL_KEY_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                     return;
@@ -462,7 +472,6 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
             sendToClient(JOIN_ENDOFNAMES_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
     }
-    
 }
 
 // INVITE Command ****************************************************************
@@ -663,7 +672,6 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
         sendToClient(TOPIC_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
         return;
     }
-
 }
 
 // MODE Command ****************************************************************
@@ -697,44 +705,43 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     }
     // this part need to be changed (ERROR MSG...)******************************************
     int size = this->args[1].size();
-    bool    is_minus = false;
+    bool is_minus = false;
     size_t count = 1;
-   for (int j = 0; j < size; j++)
+    for (int j = 0; j < size; j++)
+    {
+        if (args[1][j] == '+' || args[1][j] == 'i')
         {
-            if (args[1][j] == '+' || args[1][j] == 'i')
-            {
-                if (args[1][j] == 'i')
-                    mode_i(channel[id], client[index], is_minus);
-                continue;
-            }
-            if (args[1][j] == '-')
-            {
-                is_minus = true;
-                continue;
-            }
-            if (args[1][j] == 'l')
-            {
-                mode_l(args, channels[id], client[index], is_minus, count);
-                continue;
-            }
-            if (args[1][j] == 'k')
-            {
-                mode_k(args, channels[id], client[index], is_minus, count);
-                continue;
-            }
-            if (args[1][j] == 'o')
-            {
-                mode_o(args, channels[id], client[index], is_minus, count);
-                continue;
-            }
-            else
-            {
-                sendToClient(MODE_BADCHANMODE_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-                return;
-            }
+            if (args[1][j] == 'i')
+                mode_i(channel[id], client[index], is_minus);
+            continue;
         }
+        if (args[1][j] == '-')
+        {
+            is_minus = true;
+            continue;
+        }
+        if (args[1][j] == 'l')
+        {
+            mode_l(args, channels[id], client[index], is_minus, count);
+            continue;
+        }
+        if (args[1][j] == 'k')
+        {
+            mode_k(args, channels[id], client[index], is_minus, count);
+            continue;
+        }
+        if (args[1][j] == 'o')
+        {
+            mode_o(args, channels[id], client[index], is_minus, count);
+            continue;
+        }
+        else
+        {
+            sendToClient(MODE_BADCHANMODE_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            return;
+        }
+    }
 }
-
 
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel)
 {
@@ -748,38 +755,38 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
 {
     switch (this->indexOfCommand)
     {
-        case PASS:
-            this->PASSCommand(client, index);
-            break;
-        case NICK:
-            this->NICKCommand(client, index);
-            break;
-        case USER:
-            this->USERCommand(client, index);
-            break;
-        case PRIVMSG:
-            this->PRIVMSGCommand(client, index, channel);
-            break;
-        case JOIN:
-            this->JOINCommand(client, index, channel);
-            break;
-        case PART:
-            this->PARTCommand(client, index, channel);
-            break;
-        case MODE:
-            this->MODECommand(client, index, channel);
-            break;
-        case TOPIC:
-            this->TOPICCommand(client, index, channel);
-            break;
-        case KICK:
-            this->KICKCommand(client, index, channel);
-            break;
-        case INVITE:
-            this->INVITECommand(client, index, channel);
-            break;
-        default:
-            break;
+    case PASS:
+        this->PASSCommand(client, index);
+        break;
+    case NICK:
+        this->NICKCommand(client, index);
+        break;
+    case USER:
+        this->USERCommand(client, index);
+        break;
+    case PRIVMSG:
+        this->PRIVMSGCommand(client, index, channel);
+        break;
+    case JOIN:
+        this->JOINCommand(client, index, channel);
+        break;
+    case PART:
+        this->PARTCommand(client, index, channel);
+        break;
+    case MODE:
+        this->MODECommand(client, index, channel);
+        break;
+    case TOPIC:
+        this->TOPICCommand(client, index, channel);
+        break;
+    case KICK:
+        this->KICKCommand(client, index, channel);
+        break;
+    case INVITE:
+        this->INVITECommand(client, index, channel);
+        break;
+    default:
+        break;
     }
 }
 
@@ -787,7 +794,7 @@ void Command::commandHandler(std::map<int, Client> &client, int index, std::map<
 {
     if (channels.size() == 0)
     {
-        void();        
+        void();
     }
     if (!client[index].getIsRegistered())
     {
