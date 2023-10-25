@@ -126,7 +126,8 @@ void Command::removeSpaces(std::string &msg)
         temp = msg;
         index  = msg.size();
     }
-    trimString(temp);
+    //std::cout<<"------temp = "<<temp<<std::endl;
+    // trimString(temp);
     std::string result;
     bool previousIsSpace = false;
     for (size_t i = 0; i < temp.size(); i++) {
@@ -151,6 +152,8 @@ void Command::parse(Client &client)
 {
     std::string temp;
     this->removeSpaces(this->msg);
+    //std::cout<<"msg = "<<this->msg<<std::endl;
+    //std::cout<<"************"<<std::endl;
     std::stringstream ss(this->msg);
     std::getline(ss, temp, ' ');
     this->toUpper(temp);
@@ -168,7 +171,15 @@ void Command::parse(Client &client)
         sendToClient(UNKNOW_COMMAND_MSG(client.getNick(), this->command), client.getSocket());
         return;
     }
-    if (this->msg.find(':') != std::string::npos)
+    if (this->command == "MODE")
+    {
+        while (std::getline(ss, temp, ' '))
+        {
+            this->args.push_back(temp);
+            temp = "";
+        }
+    }
+    else if (this->msg.find(':') != std::string::npos)
     {
         std::getline(ss, temp, ':');
         std::stringstream ss2(temp);
@@ -418,7 +429,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
             // this part need error msg *********************************************************
             if (channels[id].checkNick(client[index].getNick()) != -1)
                 continue;
-            if (channels[id].getInv_mode() == true && client[index].getInveted() == false)
+            if (channels[id].getInv_mode() == true && channels[id].checkInvited(client[index].getNick()) == -1)
             {
                 sendToClient(JOIN_INVITEONLY_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                 continue;
@@ -504,7 +515,7 @@ void Command::INVITECommand(std::map<int, Client> &client, int index, std::map<i
         sendToClient(INVITE_USERONCHANNEL_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
         return;
     }
-    client[id].setInveted(true);
+    channels[id2].addInvited(client[id].getNick());
     sendToClient(INVITE_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[id].getSocket());
     sendToClient(INVITE_SUCCESS_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
 }

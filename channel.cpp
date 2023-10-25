@@ -5,6 +5,7 @@ Channel::Channel() {
     this->pass_of_channel = "";
     this->is_encrypted = false;
     this->limit = 0;
+    this->isInvited = false;
 }
 
 Channel::Channel(std::string name) {
@@ -12,6 +13,7 @@ Channel::Channel(std::string name) {
     this->pass_of_channel = "";
     this->is_encrypted = false;
     this->limit = 0;
+    this->isInvited = false;
 }
 
 Channel& Channel::operator=(const Channel& other) {
@@ -165,10 +167,23 @@ void Channel::removeoperator(std::string nickname) {
     }
 }
 
-void Channel::setInv_mode(bool inv_mode) {
-    this->inv_mode = inv_mode;
+bool Channel::getInv_mode() {
+    return this->isInvited;
 }
 
-bool Channel::getInv_mode() {
-    return this->inv_mode;
+void Channel::setInv_mode(bool inv_mode) {
+    this->isInvited = inv_mode;
+}
+
+void Channel::addInvited(std::string nickname) {
+    this->listOfInvited.push_back(nickname);
+}
+
+int Channel::checkInvited(std::string nickname) {
+    for (size_t i = 0; i < this->listOfInvited.size(); i++) {
+        if (this->listOfInvited[i] == nickname) {
+            return i;
+        }
+    }
+    return -1;
 }

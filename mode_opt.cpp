@@ -8,7 +8,7 @@ void sendToclient(const std::string &msg, int clientSocket)
 // option of MODE COMMAND
 
 // option iiiiiiiiiiiiiiiiiiii ****************************************************************************
-void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis)
+void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis)
 {
     nick = "";
     socket = 0;
@@ -20,12 +20,10 @@ void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nic
         }
     if (is_munis == true) 
         {   
-            if (args[2].empty())
-            {
-                channel.setInv_mode(false);
-                channel.sendToAll("MODE : " + args[1] + " Done, Now channel is not invite only mode\n");
-                return;
-            }
+            
+            channel.setInv_mode(false);
+            channel.sendToAll("MODE : " + args[1] + " Done, Now channel is not invite only mode\n");
+            return;
         }
 }
 
@@ -52,7 +50,7 @@ void    mode_i(std::vector<std::string> &args, Channel &channel, std::string nic
 
 
 // option kkkkkkkkkkkk********************************************************************
-void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, size_t &count)
+void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis, size_t &count)
 {
     nick = "";
     if (args.size() >= 1 + count)
@@ -69,7 +67,7 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
         }
         if (is_munis == true) 
         {   
-            if (args[1 + count].empty())
+            if (args[1 + count] == ":")
             {
                 channel.setPass("");
                 channel.setEncrypted(false);
@@ -85,13 +83,15 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, std::string nic
 
 
 // option oooooooooooooo************************************************************************
-void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, size_t &count)
+void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis, size_t &count)
 {
     nick = "";
     if (args.size() >= 1 + count)
     {
         if (is_munis == false)
         {
+            if (args[1 + count].empty())
+                return;
             if (channel.checkAdmin(args[1 + count]) != -1)
             {
                 sendToclient("MODE : " + args[1 + count] + " is already an operator\n", socket);
@@ -133,13 +133,15 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, std::string nic
 }
 
 // option llllllllllllllllllllllllllll***********************************************************
-void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool is_munis, size_t &count)
+void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nick, int socket, bool &is_munis, size_t &count)
 {
     nick = "";
     if (args.size() >= 1 + count)
     {
         if (is_munis == false)
         {
+            if (args[1 + count].empty())
+                return;
             channel.setLimit(atoi(args[1 + count].c_str()));
             channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is limited\n");
             count++;
@@ -147,7 +149,7 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, std::string nic
         }
         if (is_munis == true) 
         {   
-            if (args[2].empty())
+            if (args[1 + count] == ":")
             {
                 channel.setLimit(0);
                 channel.sendToAll("MODE : " + args[1 + count] + " Done, Now channel is not limited\n");

@@ -20,7 +20,8 @@ private:
     std::string pass_of_channel;
     bool is_encrypted;
     int limit;
-    bool inv_mode;
+    std::vector<std::string> listOfInvited;
+    bool isInvited;
 public:
     Channel();
     Channel(std::string name);
@@ -52,8 +53,10 @@ public:
 
     int getNumberOfClients();
 
-    void setInv_mode(bool inv_mode);
-    bool getInv_mode();
+    void addInvited(std::string nickname);
+    int checkInvited(std::string nickname);
+    void    setInv_mode(bool inv_mode);
+    bool    getInv_mode();
 };
 
 #endif

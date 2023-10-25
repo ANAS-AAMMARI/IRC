@@ -12,7 +12,6 @@ Client::Client(int socket, std::string password) {
     this->nick = "";
     this->isRegistered = false;
     this->isValidPass = false;
-    this->isInveted = false;
 }
 
 Client::Client(std::string nick, std::string user, int socket, std::string password) {
@@ -22,7 +21,6 @@ Client::Client(std::string nick, std::string user, int socket, std::string passw
     this->password = password;
     this->isRegistered = false;
     this->isValidPass = false;
-    this->isInveted = false;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -33,7 +31,6 @@ Client& Client::operator=(const Client& other) {
         this->password = other.password;
         this->isRegistered = other.isRegistered;
         this->isValidPass = other.isValidPass;
-        this->isInveted = other.isInveted;
     }
     return *this;
 }
@@ -91,12 +88,4 @@ void Client::setIsRegistered(bool isRegistered) {
 
 void Client::setIsValidPass(bool isValidPass) {
     this->isValidPass = isValidPass;
-}
-
-void Client::setInveted(bool isInveted) {
-    this->isInveted = isInveted;
-}
-
-bool Client::getInveted() {
-    return this->isInveted;
 }
