@@ -741,7 +741,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         if (args[1][j] == '+' || args[1][j] == 'i')
         {
             if (args[1][j] == 'i')
-                mode_i(channel[id], client[index], is_minus);
+                mode_i(channels[id], client[index], is_minus);
             continue;
         }
         if (args[1][j] == '-')
