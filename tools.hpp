@@ -12,7 +12,7 @@
 # define UNKNOW_COMMAND_MSG(nick, command) ":ft_irc 421 " + nick + " " + command + " :Unknown command\r\n"
 # define REQUIRED_MSG(nick, command) (":ft_irc 461 " + nick + " " + command + " :Not enough parameters\r\n")
 # define ALREADY_MSG(nick) (":ft_irc 462 " + nick + " :You may not reregister\r\n")
-# define PASS_INC_MSG(nick) (":ft_irc 464 " + nick + " :Password incorrect\r\n")
+# define PASS_INC_MSG(hostname) (":" + hostname + " *:Password incorrect\r\n")
 
 // error message nick
 # define NICK_REQUIRED_MSG(nick) ":ft_irc 431 " + nick + " :No nickname given\r\n"

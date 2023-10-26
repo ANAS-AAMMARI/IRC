@@ -3,6 +3,10 @@
 Client::Client() {
     this->nick = "";
     this->user = "";
+    this->socket = -1;
+    this->password = "";
+    this->isRegistered = false;
+    this->isValidPass = false;
 }
 
 Client::Client(int socket, std::string password) {

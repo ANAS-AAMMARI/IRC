@@ -117,14 +117,10 @@ void Server::run()
         // Check for client events
         for (size_t i = 1; i < pollfds.size(); i++)
         {
-
             if (pollfds[i].revents & POLLHUP)
                 handleClientDisconnection(pollfds[i].fd);
             else if (pollfds[i].revents & POLLIN)
-            {
-                //std::cout << "Client event " << pollfds[i].revents << std::endl;
                 handelClientMessage(pollfds[i].fd);
-            }
         }
     }
 

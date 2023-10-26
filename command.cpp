@@ -268,13 +268,31 @@ int Command::check_if_exist(std::string channel, std::map<int, Channel> &channel
     return -1;
 }
 
+std::string Command::getHostName()
+{
+    char hostname[1024];
+    if (gethostname(hostname, sizeof(hostname)) != 0)
+    {
+        return "NULL";
+    }
+
+    struct hostent *host = gethostbyname(hostname);
+    if (host == NULL)
+    {
+        return "NULL";
+    }
+
+    return std::string(host->h_name);
+}
+
+
 void Command::registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
     this->commandHandler(client, index, channel, server);
     if (!client[index].getIsValidPass())
         return;
     if (client[index].getNick().empty() || client[index].getUser().empty())
-        return;
+        return;  
     client[index].setIsRegistered(true);
     sendToClient(WELCOME_MSG(client[index].getNick(), getLoclalIp(), client[index].getUser()), client[index].getSocket());
     sendToClient(YOURHOST_MSG(client[index].getNick(), getLoclalIp()), client[index].getSocket());
@@ -298,7 +316,10 @@ void Command::PASSCommand(std::map<int, Client> &client, int index)
     }
     if (args[0] != client[index].getPassword())
     {
-        sendToClient(PASS_INC_MSG(client[index].getNick()), client[index].getSocket());
+        std::string msg = "";
+        if (getHostName() != "NULL")
+            msg = ":" + getHostName() + " 464 NOTICE AUTH :*** Invalid password\r\n";
+        sendToClient(msg, index);
         return;
     }
     client[index].setIsValidPass(true);
@@ -708,6 +729,9 @@ void Command::QUITCommand(std::map<int, Client> &client, int index, std::map<int
 // MODE Command ****************************************************************
 void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
+    // std::cout << "MODE " << this->command << std::endl;
+    // for (size_t i = 0; i < this->args.size(); i++)
+    //     std::cout << "args[" << i << "] = " << this->args[i] << std::endl;
     if (!client[index].getIsRegistered())
     {
         sendToClient(MODE_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
@@ -729,13 +753,8 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         sendToClient(MODE_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
         return;
     }
-    if (channels[id].checkAdmin(client[index].getNick()) == -1)
-    {
-        sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-        return;
-    }
     std::string msg = "";
-    if (this->args.size() == 1)
+    if (this->args.size() == 1 || (args.size() == 2 && args[1] == "+sn"))
     {
         if (channels[id].getInv_mode())
             msg+="i";
@@ -743,8 +762,19 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
             msg+="k";
         if (channels[id].getLimit() != 0)
             msg+="l";
+        if (channels[id].getTopicMode())
+            msg+="t";
+        if (msg.empty())
+            msg = "*";
+        else
+            msg = "+" + msg;
         sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
         return;
+    }
+    if (channels[id].checkAdmin(client[index].getNick()) == -1)
+    {
+            sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            return;
     }
     int size = this->args[1].size();
     bool is_minus = false;
@@ -799,10 +829,11 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
 
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
+    // std::cout << "Command : "<<std::endl;
     if (!client[index].getIsRegistered())
         this->registerClient(client, index, channel, server);
     else
-        this->commandHandler(client, index, channel, server); 
+        this->commandHandler(client, index, channel, server);   
 }
 
 void Command::commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
