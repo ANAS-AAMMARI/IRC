@@ -31,6 +31,10 @@ Command::Command(std::string msg, std::map<int, Client> &client, int index)
     this->msg = msg;
     this->command = "";
     this->indexOfCommand = -1;
+
+    // im not Sure about this line 
+    this->channel = NULL;
+
     this->parse(client[index]);
 }
 
@@ -162,8 +166,6 @@ void Command::parse(Client &client)
 {
     std::string temp;
     this->removeSpaces(this->msg);
-    // std::cout<<"msg = "<<this->msg<<std::endl;
-    // std::cout<<"************"<<std::endl;
     std::stringstream ss(this->msg);
     std::getline(ss, temp, ' ');
     this->toUpper(temp);
@@ -441,11 +443,6 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
             // this part need error msg *********************************************************
             if (channels[id].checkNick(client[index].getNick()) != -1)
                 continue;
-            if (channels[id].getInv_mode() == true && channels[id].checkInvited(client[index].getNick()) == -1)
-            {
-                sendToClient(JOIN_INVITE_ONLY_CHAN_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
-                continue;
-            }
             if (channels[id].getEncrypted() == true)
             {
                 if (args.size() < 2 || (args.size() >= 2 && args[1] != channels[id].getPass()))
@@ -453,6 +450,11 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
                     sendToClient(JOIN_BAD_CHANNEL_KEY_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                     return;
                 }
+            }
+            if (channels[id].getInv_mode() == true && channels[id].checkInvited(client[index].getNick()) == -1)
+            {
+                sendToClient(JOIN_INVITE_ONLY_CHAN_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
+                continue;
             }
             if (channels[id].getLimit() != 0 && channels[id].getLimit() <= channels[id].getNumberOfClients())
             {
@@ -642,7 +644,7 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
         sendToClient(TOPIC_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
         return;
     }
-    if (channels[id].checkAdmin(client[index].getNick()) != -1)
+    if (channels[id].checkAdmin(client[index].getNick()) != -1 || channels[id].getTopicMode() == false)
     {
         if (this->args.size() < 2)
         {
@@ -711,7 +713,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         sendToClient(MODE_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
-    if (this->args.size() < 2)
+    if (this->args.size() < 1)
     {
         sendToClient(REQUIRED_MSG(client[index].getNick(), "MODE"), client[index].getSocket());
         return;
@@ -732,16 +734,34 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
         return;
     }
-    // this part need to be changed (ERROR MSG...)******************************************
+    std::string msg = "";
+    if (this->args.size() == 1)
+    {
+        if (channels[id].getInv_mode())
+            msg+="i";
+        if (channels[id].getEncrypted())
+            msg+="k";
+        if (channels[id].getLimit() != 0)
+            msg+="l";
+        sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
+        return;
+    }
     int size = this->args[1].size();
     bool is_minus = false;
     size_t count = 1;
+    int check = 0;
     for (int j = 0; j < size; j++)
     {
+        if (size > 1)
+        {
+            check = 1;
+            if (j + 1 == size)
+                check = 2;
+        }
         if (args[1][j] == '+' || args[1][j] == 'i')
         {
             if (args[1][j] == 'i')
-                mode_i(channels[id], client[index], is_minus);
+                mode_i(args,channels[id], client[index], is_minus, msg, check);
             continue;
         }
         if (args[1][j] == '-')
@@ -751,17 +771,22 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         }
         if (args[1][j] == 'l')
         {
-            mode_l(args, channels[id], client[index], is_minus, count);
+            mode_l(args, channels[id], client[index], is_minus, count, msg, check);
             continue;
         }
         if (args[1][j] == 'k')
         {
-            mode_k(args, channels[id], client[index], is_minus, count);
+            mode_k(args, channels[id], client[index], is_minus, count, msg, check);
             continue;
         }
         if (args[1][j] == 'o')
         {
-            mode_o(args, channels[id], client[index], is_minus, count);
+            mode_o(args, channels[id], client[index], is_minus, count, msg, check);
+            continue;
+        }
+        if (args[1][j] == 't')
+        {
+            mode_tp(args, channels[id], client[index], is_minus, msg, check);
             continue;
         }
         else

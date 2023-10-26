@@ -9,12 +9,10 @@ class Channel;
 
 void    sendToclient(const std::string &msg, int clientSocket);
 
-// option of MODE COMMAND
-void    mode_i(Channel &channel, Client client, bool &is_munis);
-void    mode_k(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count);
-void    mode_l(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count);
-void    mode_o(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count);
+void    mode_k(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count, std::string &msg, int check);
+void    mode_l(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count, std::string &msg, int check);
+void    mode_o(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, size_t &count, std::string &msg, int check);
+void    mode_i(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, std::string &msg, int check);
+void    mode_tp(std::vector<std::string> &args, Channel &channel, Client client, bool &is_munis, std::string &msg, int check);
 
-//void    mode_t(std::vector<std::string> &args, Channel &channel, std::string nick, int socket);
 #endif 
-//mode #te ik-lo ss 1 bimo

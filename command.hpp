@@ -84,8 +84,8 @@ public:
     void QUITCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
 
 
-    void BOTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
-    int  get_ur_age(std::string &str);
+    //void BOTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
+    //int  get_ur_age(std::string &str);
 };
 // int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
 // void check_channel(std::string channel, Client &client, std::map<int, Channel> &channels);

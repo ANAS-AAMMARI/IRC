@@ -20,6 +20,7 @@ private:
     std::vector<Client> listofAdmins;
     std::string pass_of_channel;
     bool is_encrypted;
+    bool topic_mode;
     int limit;
     std::vector<std::string> listOfInvited;
     bool isInvited;
@@ -53,6 +54,10 @@ public:
     // option L
     void setLimit(int limit);
     int  getLimit();
+
+    // option T
+    void setTopicMode(bool topic_mode);
+    bool getTopicMode();
 
     int getNumberOfClients();
 
