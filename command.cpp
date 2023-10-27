@@ -743,9 +743,15 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         return;
     }
     int id = check_if_exist(this->args[0], channels);
+    int cl = checkNickUser(client, this->args[1], 1);
     if (id == -1)
     {
         sendToClient(MODE_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
+    }
+    if (cl == -1)
+    {
+        sendToClient(MODE_NOSUCHNICK_MSG(client[index].getNick(), this->args[1]), client[index].getSocket());
         return;
     }
     if (channels[id].checkNick(client[index].getNick()) == -1)

@@ -72,6 +72,7 @@
 # define MODE_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
 # define MODE_BADCHANNELKEY_MSG(nick, channel) ":ft_irc 475 " + nick + " " + channel + " :Cannot join channel (+k)\r\n"
 # define MODE_NOSUCHCHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
+# define MODE_NOSUCHNICK_MSG(nick, recipient) ":ft_irc 401 " + nick + " " + recipient + " :No such nick/channel\r\n"
 # define MODE_MSG(nick, user, ip, channel, option) ":" + nick + "!~" + user + "@" + ip + " MODE " + channel + " " + option + "\r\n"
 # define MODE_BADCHANMODE_MSG(nick, channel) ":ft_irc 471 " + nick + " " + channel + " :Bad mode in channel (+b)\r\n"
 # define MODE_SUCCESS_MSG(nick, channel, msg) ":ft_irc 324 " + nick + " " + channel + " " + msg + "\r\n"
