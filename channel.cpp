@@ -4,8 +4,8 @@ Channel::Channel() {
     this->topic = "";
     this->name = "";
     this->pass_of_channel = "";
-    this->is_encrypted = false;
     this->limit = 0;
+    this->is_encrypted = false;
     this->isInvited = false;
     this->topic_mode = true;
 }
@@ -14,8 +14,8 @@ Channel::Channel(std::string name) {
     this->topic = "";
     this->name = name;
     this->pass_of_channel = "";
-    this->is_encrypted = false;
     this->limit = 0;
+    this->is_encrypted = false;
     this->isInvited = false;
     this->topic_mode = true;
 }
@@ -27,6 +27,10 @@ Channel& Channel::operator=(const Channel& other) {
     this->is_encrypted = other.is_encrypted;
     this->limit = other.limit;
     this->isInvited = other.isInvited;
+    this->topic_mode = other.topic_mode;
+    this->clients = other.clients;
+    this->listofAdmins = other.listofAdmins;
+    this->listOfInvited = other.listOfInvited;
     return *this;
 }
 

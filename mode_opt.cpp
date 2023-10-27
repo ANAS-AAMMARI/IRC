@@ -39,20 +39,48 @@ void    mode_i(std::vector<std::string> &args ,Channel &channel, Client client, 
 {
     if (!is_munis)
     {
+        if (channel.getInv_mode())
+            return;
         channel.setInv_mode(true);
         if (!check)
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+i"));
         if (check == 2)
-            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+" + args[1]));
+        {
+            size_t i  = 2;
+            std::string temp = "";
+            if (args[1][0] == '-' || args[1][0] == '+')
+                temp = args[1];
+            else
+                temp = "+" + args[1];
+            while (i < args.size())
+                temp += " " + args[i++];
+            if(args.size() == 2)
+                temp += " *";
+            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+        }
         return;
     }
     if (is_munis) 
     {   
+        if (!channel.getInv_mode())
+            return;
         channel.setInv_mode(false);
         if (!check)
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-i"));
-        else
-            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), args[1]));
+        if (check == 2)
+        {
+            size_t i  = 2;
+            std::string temp = "";
+            if (args[1][0] == '-' || args[1][0] == '+')
+                temp = args[1];
+            else
+                temp = "+" + args[1];
+            while (i < args.size())
+                temp += " " + args[i++];
+            if(args.size() == 2)
+                temp += " *";
+            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+        }
         removeCharacter(msg, 'i');
         return;
     }
@@ -63,20 +91,47 @@ void    mode_tp(std::vector<std::string> &args, Channel &channel, Client client,
 {
     if (!is_munis)
     {
+        if (channel.getTopicMode())
+            return;
        channel.setTopicMode(true);
         if (!check)
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+t"));
         if (check == 2)
-            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+" + args[1]));
+            {
+                size_t i  = 2;
+                std::string temp = "";
+                if (args[1][0] == '-' || args[1][0] == '+')
+                    temp = args[1];
+                else
+                while (i < args.size())
+                    temp += " " + args[i++];
+                if (args.size() == 2)
+                    temp += " *";
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+            }
         return; 
     }
     if (is_munis)
     {
+        if (!channel.getTopicMode())
+            return;
         channel.setTopicMode(false);
         if (!check)
-            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-t"));
+            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-t " + "*"));
         if (check == 2)
-            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), args[1]));
+        {
+            size_t i  = 2;
+            std::string temp = "";
+            if (args[1][0] == '-' || args[1][0] == '+')
+                temp = args[1];
+            else
+                temp = "+" + args[1];
+            while (i < args.size())
+                temp += " " + args[i++];
+            if (args.size() == 2)
+                temp += " *";
+            channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+        }
         removeCharacter(msg, 't');
         return;
     }
@@ -95,29 +150,48 @@ void    mode_k(std::vector<std::string> &args, Channel &channel, Client client, 
             channel.setPass(args[1 + count]);
             channel.setEncrypted(true);
             if (!check)
-                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+k"));
-            if (check == 2)
-                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+" + args[1]));
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+k " + args[1 + count]));
+            if (check == 2) 
+            {
+                size_t i  = 2;
+                std::string temp = "";
+                if (args[1][0] == '-' || args[1][0] == '+')
+                    temp = args[1];
+                else
+                    temp = "+" + args[1];
+                 while (i < args.size())
+                    temp += " " + args[i++];
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+            }
             count++;
             return;
         }
         if (is_munis) 
         {   
-            if (args[1 + count] == ":")
+            channel.setPass("");
+            channel.setEncrypted(false);
+            if (!check)
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-k " + "*"));
+            if (check == 2)
             {
-                channel.setPass("");
-                channel.setEncrypted(false);
-                if (!check)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-k"));
-                if (check == 2)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), args[1]));
-                count++;
-                removeCharacter(msg, 'k');
-                return;
-            }
+                size_t i  = 2;
+                std::string temp = "";
+                if (args[1][0] == '-' || args[1][0] == '+')
+                    temp = args[1];
+                else
+                    temp = "+" + args[1];
+                while (i < args.size())
+                    temp += " " + args[i++];
+                if (args.size() == 2)
+                    temp += " *";
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+            }   
+            count++;
+            removeCharacter(msg, 'k');
+            return;
         }
     }
-    sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
+    //sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
 }
 
 
@@ -140,9 +214,19 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, Client client, 
             {
                 channel.addoperator(args[1 + count]);
                 if (!check)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+o"));
+                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+o " + args[1 + count]));
                 if (check == 2)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+" + args[1]));
+                {
+                    size_t i  = 2;
+                    std::string temp = "";
+                    if (args[1][0] == '-' || args[1][0] == '+')
+                        temp = args[1];
+                    else
+                        temp = "+" + args[1];
+                    while (i < args.size())
+                        temp += " " + args[i++];
+                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+                }
                 count++;
                 return;
             }
@@ -156,9 +240,19 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, Client client, 
             {
                 channel.removeoperator(args[1 + count]);
                 if (!check)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-o"));
+                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-o " + args[1 + count]));
                 if (check == 2)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), args[1]));
+                {
+                    size_t i  = 2;
+                    std::string temp = "";
+                    if (args[1][0] == '-' || args[1][0] == '+')
+                        temp = args[1];
+                    else
+                    temp = "+" + args[1];
+                    while (i < args.size())
+                        temp += " " + args[i++];
+                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+                }
                 count++;
                 removeCharacter(msg, 'o');
                 return;
@@ -173,7 +267,7 @@ void    mode_o(std::vector<std::string> &args, Channel &channel, Client client, 
             count++;
             return;
         }
-        sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
+        //sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
     }
 }
 
@@ -188,26 +282,45 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, Client client, 
                 return;
             channel.setLimit(atoi(args[1 + count].c_str()));
             if (!check)
-                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+l"));
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "l " + args[1 + count]));
             if (check == 2)
-                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+" + args[1]));
+            {
+                size_t i  = 2;
+                std::string temp = "";
+                if (args[1][0] == '-' || args[1][0] == '+')
+                    temp = args[1];
+                else
+                temp = "+" + args[1];
+                while (i < args.size())
+                    temp += " " + args[i++];
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+            }
             count++;
             return;
         }
         if (is_munis)
         {   
-            if (args[1 + count] == ":")
-            {
                 channel.setLimit(0);
                 if (!check)
                     channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-l"));
                 if (check == 2)
-                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), args[1]));
+                {
+                    size_t i  = 2;
+                    std::string temp = "";
+                    if (args[1][0] == '-' || args[1][0] == '+')
+                            temp = args[1];
+                     else
+                        temp = "+" + args[1];
+                    while (i < args.size())
+                        temp += " " + args[i++];
+                    if (args.size() == 2)
+                        temp += " *";
+                    channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
+                }
                 count++;
                 removeCharacter(msg, 'l');
                 return;
-            }
         }
     }
-    sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
+    //sendToclient(REQUIRED_MSG(client.getNick(), "MODE"), client.getSocket());
 }

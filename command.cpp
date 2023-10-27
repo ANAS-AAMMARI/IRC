@@ -4,6 +4,23 @@
 
 std::vector<std::string> Command::listOfCommands;
 
+void    removeOperators(std::string &msg)
+{
+    size_t i = 0;
+    std::string temp = "";
+    while (i < msg.size())
+    {
+        if (msg[i] == '+' || msg[i] == '-')
+            i++;
+        else
+        {
+            temp += msg[i - 1];
+            temp += msg[i++];
+        }
+    }
+    msg = temp;
+}
+
 void Command::sendToClient(const std::string &msg, int clientSocket)
 {
     send(clientSocket, msg.c_str(), msg.size(), 0);
@@ -183,14 +200,14 @@ void Command::parse(Client &client)
         sendToClient(UNKNOW_COMMAND_MSG(client.getNick(), this->command), client.getSocket());
         return;
     }
-    if (this->command == "MODE")
+    /*if (this->command == "MODE")
     {
         while (std::getline(ss, temp, ' '))
         {
             this->args.push_back(temp);
             temp = "";
         }
-    }
+    }*/
     else if (this->msg.find(':') != std::string::npos)
     {
         std::getline(ss, temp, ':');
@@ -453,6 +470,11 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
     {
         if (recipients[i].empty())
             continue;
+        if (recipients[i].size() == 1 && recipients[i][0] == '#')
+        {
+            sendToClient(REQUIRED_MSG(client[index].getNick(), "JOIN"), client[index].getSocket());
+            continue;
+        }
         if (recipients[i][0] != '#')
         {
             sendToClient(JOIN_NO_SUCH_CHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
@@ -743,15 +765,10 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         return;
     }
     int id = check_if_exist(this->args[0], channels);
-    int cl = checkNickUser(client, this->args[1], 1);
+    //int cl = checkNickUser(client, this->args[1], 1);
     if (id == -1)
     {
         sendToClient(MODE_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-        return;
-    }
-    if (cl == -1)
-    {
-        sendToClient(MODE_NOSUCHNICK_MSG(client[index].getNick(), this->args[1]), client[index].getSocket());
         return;
     }
     if (channels[id].checkNick(client[index].getNick()) == -1)
@@ -782,10 +799,11 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
             sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
             return;
     }
-    int size = this->args[1].size();
     bool is_minus = false;
     size_t count = 1;
     int check = 0;
+    removeOperators(this->args[1]);
+    int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
         if (size > 1)
@@ -798,6 +816,8 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         {
             if (args[1][j] == 'i')
                 mode_i(args,channels[id], client[index], is_minus, msg, check);
+            else
+                is_minus = false;
             continue;
         }
         if (args[1][j] == '-')
@@ -817,6 +837,11 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         }
         if (args[1][j] == 'o')
         {
+            if (checkNickUser(client, this->args[1 + count], 1) == -1)
+            {
+                sendToClient(MODE_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+                return;
+            }
             mode_o(args, channels[id], client[index], is_minus, count, msg, check);
             continue;
         }
