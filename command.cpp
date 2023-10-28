@@ -4,25 +4,34 @@
 
 std::vector<std::string> Command::listOfCommands;
 
-/*void    remove_duplicate(std::string &msg)
-{
+void remove_duplicate(std::string &msg) {
     size_t i = 0;
     std::string temp = "";
-    char prev_option;
-    while (i < msg.size())
-    {
-        if (msg[i] == 'o' || msg[i] == 'i' || msg[i] == 'k' || msg[i] == 'l' || msg[i] == 't')
+    char prev_option = ' ';
+    int check = 1;
+    while (i < msg.size()) {
+        if ((msg[i] == 'i' || msg[i] == 't') && check) {
             prev_option = msg[i++];
-        else
-        {
-            if (prev_option == 'o' || prev_option == 'i' || prev_option == 'k' || prev_option == 'l' || prev_option == 't')
+            check = 0;
+        } else if ((msg[i] == 'i' || msg[i] == 't') && msg[i] == prev_option) {
+            while (i < msg.size() && msg[i] == prev_option) {
+                ++i;
+            }
+        } else {
+            if (prev_option == 'i' || prev_option == 't') {
                 temp += prev_option;
+            }
             temp += msg[i++];
             prev_option = ' ';
+            check = 1;
         }
     }
+    if (prev_option == 'i' || prev_option == 't') {
+        temp += prev_option;
+    }
     msg = temp;
-}*/
+}
+
 
 void    removeOperators(std::string &msg)
 {
@@ -878,13 +887,11 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     bool is_minus = false;
     size_t count = 1;
     int check = 0;
-    //remove_duplicate(this->args[1]);
+    remove_duplicate(this->args[1]);
     removeOperators(this->args[1]);
     int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
-        std::cout<<"j = "<<j<<std::endl;
-        std::cout<<"check = "<<check<<std::endl;
         if (size > 1)
         {
             check = 1;
