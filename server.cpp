@@ -124,8 +124,12 @@ void Server::run()
         }
     }
 
+    // Close sockets for all clients
+    for (size_t i = 1; i < pollfds.size(); i++)
+        close(pollfds[i].fd);
     // Close server socket
     close(serverSocket);
+    pollfds.clear();
 }
 
 void Server::handleNewConnection()

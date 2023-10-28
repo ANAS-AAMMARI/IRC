@@ -3,6 +3,8 @@
 Channel::Channel() {
     this->topic = "";
     this->name = "";
+    this->topic_time = "";
+    this->creation_time = "";
     this->pass_of_channel = "";
     this->limit = 0;
     this->is_encrypted = false;
@@ -12,6 +14,8 @@ Channel::Channel() {
 
 Channel::Channel(std::string name) {
     this->topic = "";
+    this->topic_time = "";
+    this->creation_time = "";
     this->name = name;
     this->pass_of_channel = "";
     this->limit = 0;
@@ -31,6 +35,8 @@ Channel& Channel::operator=(const Channel& other) {
     this->clients = other.clients;
     this->listofAdmins = other.listofAdmins;
     this->listOfInvited = other.listOfInvited;
+    this->creation_time = other.creation_time;
+    this->topic_time = other.topic_time;
     return *this;
 }
 
@@ -55,6 +61,22 @@ void Channel::setTopic(std::string topic) {
 
 std::string Channel::getTopic() {
     return this->topic;
+}
+
+void Channel::setTopic_time(std::string topic_time) {
+    this->topic_time = topic_time;
+}
+
+std::string Channel::getTopic_time() {
+    return this->topic_time;
+}
+
+void Channel::setCreation_time(std::string creation_time) {
+    this->creation_time = creation_time;
+}
+
+std::string Channel::getCreation_time() {
+    return this->creation_time;
 }
 
 void Channel::addClient(Client &client) {

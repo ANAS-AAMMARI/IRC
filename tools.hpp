@@ -13,6 +13,7 @@
 # define REQUIRED_MSG(nick, command) (":ft_irc 461 " + nick + " " + command + " :Not enough parameters\r\n")
 # define ALREADY_MSG(nick) (":ft_irc 462 " + nick + " :You may not reregister\r\n")
 # define PASS_INC_MSG(hostname) (":" + hostname + " *:Password incorrect\r\n")
+# define PASS_REQ_MSG(hostname) (":" + hostname + " *:Password required\r\n")
 
 // error message nick
 # define NICK_REQUIRED_MSG(nick) ":ft_irc 431 " + nick + " :No nickname given\r\n"
@@ -32,6 +33,7 @@
 # define JOIN_ENDOFNAMES_MSG(nick, channel) ":ft_irc 366 " + nick + " " + channel + " :End of /NAMES list\r\n"
 # define JOIN_MSG(nick, user, ip, chan) ":" + nick + "!~" + user + "@" + ip + " JOIN " + chan + "\r\n"
 # define JOIN_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
+# define JOIN_CREATE_TIME_MSG(nick, channel, tim) ":ft_irc 329 " + nick + " " + channel + " " + tim + "\r\n"
 
 // error message Kick
 # define KICK_NOSUCHCHANNEL_MSG(nick, channel) ":ft_irc 403 " + nick + " " + channel + " :No such channel\r\n"
@@ -47,7 +49,7 @@
 # define PRIVMSG_CANNOTSENDTOCHAN_MSG(nick, recipient) ":ft_irc 404 " + nick + " " + recipient + " :Cannot send to channel\r\n"
 # define PRIVMSG_NORECIPIENT_MSG(nick) ":ft_irc 411 " + nick + " :No recipient given (PRIVMSG)\r\n"
 # define PRIVMSG_NOTEXTTOSEND_MSG(nick) ":ft_irc 412 " + nick + " :No text to send\r\n"
-# define PRIVMSG_AWAY_MSG(nick, user, ip, recipient, awayMsg) ":" + nick + "!~" + user + "@" + ip + " PRIVMSG " + recipient + " :" + awayMsg + "\r\n"
+# define PRIVMSG_AWAY_MSG(nick, user, ip, recipient, awayMsg) ":" + nick + "!~" + user + "@" + ip + " PRIVMSG " + recipient + " " + awayMsg + "\r\n"
 # define PRIVMSG_NOTREGISTERED(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
 
 // error message INVITE
@@ -84,8 +86,9 @@
 # define TOPIC_NOTONCHANNEL_MSG(nick, channel) ":ft_irc 442 " + nick + " " + channel + " :You're not on that channel\r\n"
 # define TOPIC_CHANOPRIVSNEEDED_MSG(nick, channel) ":ft_irc 482 " + nick + " " + channel + " :You're not channel operator\r\n"
 # define TOPIC_NOTOPIC_MSG(nick, channel) ":ft_irc 331 " + nick + " " + channel + " :No topic is set\r\n"
-# define TOPIC_MSG(nick, channel, topic) ":ft_irc 332 " + nick + " " + channel + " :" + topic + "\r\n"
 # define TOPIC_WHOTIME_MSG(nick, channel, topic, time) ":ft_irc 333 " + nick + " " + channel + " " + topic + " " + time + "\r\n"
+# define TOPIC_MSG(nick, channel, topic) ":ft_irc 332 " + nick + " " + channel + " :" + topic + "\r\n"
+# define TOPIC_SET_MSG(nick, user, ip, channel, topic) ":" + nick + "!~" + user + "@" + ip + " TOPIC " + channel + " :" + topic + "\r\n"
 
 // error message QUIT
 # define QUIT_MSG(nick, user, ip) ":" + nick + "!~" + user + "@" + ip + " QUIT :Client Quit\r\n"

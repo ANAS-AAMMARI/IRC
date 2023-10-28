@@ -4,6 +4,26 @@
 
 std::vector<std::string> Command::listOfCommands;
 
+/*void    remove_duplicate(std::string &msg)
+{
+    size_t i = 0;
+    std::string temp = "";
+    char prev_option;
+    while (i < msg.size())
+    {
+        if (msg[i] == 'o' || msg[i] == 'i' || msg[i] == 'k' || msg[i] == 'l' || msg[i] == 't')
+            prev_option = msg[i++];
+        else
+        {
+            if (prev_option == 'o' || prev_option == 'i' || prev_option == 'k' || prev_option == 'l' || prev_option == 't')
+                temp += prev_option;
+            temp += msg[i++];
+            prev_option = ' ';
+        }
+    }
+    msg = temp;
+}*/
+
 void    removeOperators(std::string &msg)
 {
     size_t i = 0;
@@ -188,7 +208,7 @@ void Command::toUpper(std::string &str)
 void Command::parse(Client &client)
 {
     std::string temp;
-    this->removeSpaces(this->msg);
+    trimString(this->msg);
     std::stringstream ss(this->msg);
     std::getline(ss, temp, ' ');
     this->toUpper(temp);
@@ -206,25 +226,38 @@ void Command::parse(Client &client)
         sendToClient(UNKNOW_COMMAND_MSG(client.getNick(), this->command), client.getSocket());
         return;
     }
-    /*if (this->command == "MODE")
-    {
-        while (std::getline(ss, temp, ' '))
+    if (this->indexOfCommand == PRIVMSG)
+    {  
+        std::string temp2 = ss.str().substr(7);
+        trimString(temp2);
+        size_t index = temp2.find(' ');
+        if (index != std::string::npos)
         {
-            this->args.push_back(temp);
-            temp = "";
+            this->args.push_back(temp2.substr(0, index));
+            temp2 = temp2.substr(index + 1);
+            trimString(temp2);
+            this->args.push_back(temp2);
         }
-    }*/
-    else if (this->msg.find(':') != std::string::npos)
+        else
+            this->args.push_back(temp2);
+        return;
+    }
+    this->msg = ss.str().substr(this->command.size());
+    removeSpaces(this->msg);
+    std::stringstream ss1(this->msg);
+
+    size_t index = this->msg.find(':');
+    if (index != std::string::npos)
     {
-        std::getline(ss, temp, ':');
+        std::getline(ss1, temp, ':');
         std::stringstream ss2(temp);
         while (std::getline(ss2, temp, ' '))
             this->args.push_back(temp);
-        std::getline(ss, temp);
+        std::getline(ss1, temp);
         this->args.push_back(temp);
     }
     else
-        while (std::getline(ss, temp, ' '))
+        while (std::getline(ss1, temp, ' '))
             this->args.push_back(temp);
 }
 
@@ -235,9 +268,23 @@ std::string Command::getCurrentDateTime()
     char buf[80];
 
     tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%a %b %d %Y at %H:%M:%S %Z", &tstruct);
+    strftime(buf, sizeof(buf), "%a %b %d %Y at %H:%M:%S %p", &tstruct);
 
     return std::string(buf);
+}
+
+//tal man ba3d
+time_t getCreationTime(const std::string creation_time) {
+    const char* dateString = creation_time.c_str();
+    struct tm timeinfo;
+
+    const char* format = "%a %b %d %Y at %H:%M:%S";
+
+    if (strptime(dateString, format, &timeinfo) != NULL) {
+        timeinfo.tm_isdst = -1;
+        return mktime(&timeinfo);
+    }
+    return 0;
 }
 
 bool Command::checkNick(const std::string &nickname)
@@ -351,6 +398,11 @@ void Command::PASSCommand(std::map<int, Client> &client, int index)
 // NICK Command ***********************************************************
 void Command::NICKCommand(std::map<int, Client> &client, int index)
 {
+    if (client[index].getIsValidPass() == false)
+    {
+        sendToClient(PASS_REQ_MSG(getHostName()), client[index].getSocket());
+        return;
+    }
     if (this->args.size() < 1)
     {
         sendToClient(NICK_REQUIRED_MSG(client[index].getNick()), client[index].getSocket());
@@ -385,6 +437,13 @@ void Command::USERCommand(std::map<int, Client> &client, int index)
         sendToClient(ALREADY_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
+    if (client[index].getIsValidPass() == false)
+    {
+
+        sendToClient(PASS_REQ_MSG(getHostName()), client[index].getSocket());
+        return;
+    }
+
     if (this->args.size() < 4)
     {
         sendToClient(REQUIRED_MSG(client[index].getNick(), "USER"), client[index].getSocket());
@@ -434,9 +493,7 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
                     sendToClient(PRIVMSG_CANNOTSENDTOCHAN_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                     return;
                 }
-                channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(),
-                                                             client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]),
-                                            client[index].getNick());
+                channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
             }
             else
                 sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
@@ -476,14 +533,14 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
     {
         if (recipients[i].empty())
             continue;
-        if (recipients[i].size() == 1 && recipients[i][0] == '#')
+        if (recipients[i].size() < 2)
         {
             sendToClient(REQUIRED_MSG(client[index].getNick(), "JOIN"), client[index].getSocket());
             continue;
         }
         if (recipients[i][0] != '#')
         {
-            sendToClient(JOIN_NO_SUCH_CHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+            sendToClient(JOIN_NO_SUCH_CHANNEL_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
             continue;
         }
         int id = check_if_exist(recipients[i], channels);
@@ -518,6 +575,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
         else
         {
             Channel newChannel(recipients[i]);
+            newChannel.setCreation_time(getCurrentDateTime());
             channels[channels.size()] = newChannel;
             channels[channels.size() - 1].addAdmin(client[index]);
             sendToClient(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]), client[index].getSocket());
@@ -705,12 +763,15 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
         }
         if (this->args[1].empty())
         {
-            channels[id].setTopic("");
-            channels[id].sendToAll(TOPIC_MSG(client[index].getNick(), this->args[0], ""));
+            channels[id].setTopic(":");
+            channels[id].sendToAll(TOPIC_SET_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], channels[id].getTopic()));
             return;
         }
-        channels[id].setTopic(this->args[1]);
-        channels[id].sendToAll(TOPIC_MSG(client[index].getNick(), this->args[0], this->args[1]));
+        std::string msg = "";
+        for (size_t i = 1; i < this->args.size(); i++)
+            msg += this->args[i] + " ";
+        channels[id].setTopic(msg);
+        channels[id].sendToAll(TOPIC_SET_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], channels[id].getTopic()));
     }
     else
     {
@@ -719,7 +780,11 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
             if (channels[id].getTopic().empty())
                 sendToClient(TOPIC_NOTOPIC_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
             else
+            {
                 sendToClient(TOPIC_MSG(client[index].getNick(), this->args[0], channels[id].getTopic()), client[index].getSocket());
+                std::string msg = ":" + client[index].getNick() + "set the topic at " + channels[id].getTopic_time();
+                sendToClient(msg, client[index].getSocket());
+            }    
             return;
         }
         sendToClient(TOPIC_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
@@ -793,7 +858,16 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
             msg = "*";
         else
             msg = "+" + msg;
+        if (channels[id].getLimit() != 0)
+            msg += " " + std::to_string(channels[id].getLimit());
+        if (channels[id].getEncrypted())
+            msg += " " + channels[id].getPass();
         sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
+        time_t timestamp = getCreationTime(channels[id].getCreation_time());
+        std::ostringstream oss;
+        oss << timestamp;
+        std::string str = oss.str();
+        sendToClient(JOIN_CREATE_TIME_MSG(client[index].getNick(), this->args[0], str), client[index].getSocket());
         return;
     }
     if (channels[id].checkAdmin(client[index].getNick()) == -1)
@@ -804,11 +878,13 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     bool is_minus = false;
     size_t count = 1;
     int check = 0;
+    //remove_duplicate(this->args[1]);
     removeOperators(this->args[1]);
-    std::cout << "args[1] = " << this->args[1] << std::endl;
     int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
+        std::cout<<"j = "<<j<<std::endl;
+        std::cout<<"check = "<<check<<std::endl;
         if (size > 1)
         {
             check = 1;

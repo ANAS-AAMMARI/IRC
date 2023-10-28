@@ -15,6 +15,7 @@ class Client;
 class Channel {
 private:
     std::string topic;
+    std::string topic_time;
     std::string name;
     std::vector<Client> clients;
     std::vector<Client> listofAdmins;
@@ -24,6 +25,7 @@ private:
     int limit;
     std::vector<std::string> listOfInvited;
     bool isInvited;
+    std::string creation_time;
 public:
     Channel();
     Channel(std::string name);
@@ -34,6 +36,10 @@ public:
     std::string getName();
     void setTopic(std::string topic);
     std::string getTopic();
+    void setTopic_time(std::string topic_time);
+    std::string getTopic_time();
+    void setCreation_time(std::string creation_time);
+    std::string getCreation_time();
     void addClient(Client &client);
     void addAdmin(Client &client);
     void addoperator(std::string nickname);
