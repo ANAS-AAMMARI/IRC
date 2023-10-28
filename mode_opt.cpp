@@ -282,7 +282,7 @@ void    mode_l(std::vector<std::string> &args, Channel &channel, Client client, 
                 return;
             channel.setLimit(atoi(args[1 + count].c_str()));
             if (!check)
-                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "l " + args[1 + count]));
+                channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+l " + args[1 + count]));
             if (check == 2)
             {
                 size_t i  = 2;

@@ -8,14 +8,20 @@ void    removeOperators(std::string &msg)
 {
     size_t i = 0;
     std::string temp = "";
+    char prev_operator;
     while (i < msg.size())
     {
         if (msg[i] == '+' || msg[i] == '-')
+        {
+            prev_operator = msg[i];
             i++;
+        }
         else
         {
-            temp += msg[i - 1];
+            if (prev_operator == '+' || prev_operator == '-')
+                temp += prev_operator;
             temp += msg[i++];
+            prev_operator = ' ';
         }
     }
     msg = temp;
@@ -751,9 +757,6 @@ void Command::QUITCommand(std::map<int, Client> &client, int index, std::map<int
 // MODE Command ****************************************************************
 void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
-    // std::cout << "MODE " << this->command << std::endl;
-    // for (size_t i = 0; i < this->args.size(); i++)
-    //     std::cout << "args[" << i << "] = " << this->args[i] << std::endl;
     if (!client[index].getIsRegistered())
     {
         sendToClient(MODE_NOTREGISTERED_MSG(client[index].getNick()), client[index].getSocket());
@@ -765,7 +768,6 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         return;
     }
     int id = check_if_exist(this->args[0], channels);
-    //int cl = checkNickUser(client, this->args[1], 1);
     if (id == -1)
     {
         sendToClient(MODE_NOSUCHCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
@@ -803,6 +805,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     size_t count = 1;
     int check = 0;
     removeOperators(this->args[1]);
+    std::cout << "args[1] = " << this->args[1] << std::endl;
     int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
