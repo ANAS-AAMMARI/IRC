@@ -191,8 +191,8 @@ void mode_k(std::vector<std::string> &args, Channel &channel, Client client, boo
                 temp += " " + args[i++];
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
         }
-            count++;
-            return;
+        count++;
+        return;
     }
     if (is_munis)
     {

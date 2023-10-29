@@ -10,6 +10,10 @@
 
 class Client {
 private:
+    int Random_number;
+    int tryed;
+    int guess_number;
+    int game_start;
     std::string nick;
     std::string user;
     int socket;
@@ -38,6 +42,17 @@ public:
     void setIsRegistered(bool isRegistered);
     void setIsValidPass(bool isValidPass);
 
+
+    void setGameStart(int game_start);
+    void setTryed(int tryed);
+    void increaseTryed();
+    void setRandomNumber(int Random_number);
+    void setguess_number(int guess_number);
+
+    int getGameStart();
+    int getTryed();
+    int getRandomNumber();
+    int getguess_number();
 };
 
 #endif // CLIENT_HPP
