@@ -229,11 +229,6 @@ void mode_o(std::vector<std::string> &args, Channel &channel, Client client, boo
             return;
         if (args[1 + count].empty() && (check || check == 2))
             check = 3;
-        if (channel.checkAdmin(args[1 + count]) != -1)
-        {
-            count++;
-            return;
-        }
         if (channel.checkNick(args[1 + count]) != -1)
         {
             channel.addoperator(args[1 + count]);

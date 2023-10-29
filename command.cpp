@@ -300,10 +300,8 @@ time_t getCreationTime(const std::string creation_time) {
 bool Command::checkNick(const std::string &nickname)
 {
     if (nickname.empty() || nickname[0] == ':' || nickname.find(' ') != std::string::npos)
-    {
         return false;
-    }
-    const std::string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}\\`^|";
+    const std::string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}\\`^|_";
 
     if (isdigit(nickname[0]))
         return false;
@@ -856,23 +854,35 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     std::string msg = "";
     if (this->args.size() == 1 || (args.size() == 2 && args[1] == "+sn"))
     {
+        bool plus = false;
         if (channels[id].getInv_mode())
+        {
+            plus = true;
             msg+="i";
+        } 
         if (channels[id].getEncrypted())
+        {
+            plus = true;
             msg+="k";
+        }    
         if (channels[id].getLimit() != 0)
+        {
+            plus = true;
             msg+="l";
+        }    
         if (channels[id].getTopicMode())
+        {
+            plus = true;
             msg+="t";
-        if (msg.empty())
-            msg = "*";
-        else
+        }
+        if (plus)
             msg = "+" + msg;
         if (channels[id].getEncrypted())
             msg += " " + channels[id].getPass();
         if (channels[id].getLimit() != 0)
             msg += " " + std::to_string(channels[id].getLimit());
-        sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
+        if (!msg.empty())
+            sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
         time_t timestamp = getCreationTime(channels[id].getCreation_time());
         std::ostringstream oss;
         oss << timestamp;
