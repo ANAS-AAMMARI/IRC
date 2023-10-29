@@ -1038,32 +1038,18 @@ void    Command::BIMOCommand(std::map<int, Client> &client, int index)
             }
         }
         else if (args[0] == "[1]")
-        {
-                client[index].setGameStart(0);
                 sendToClient("👋Hii '_', what do you expect me to say -_- lol :)\n", client[index].getSocket());
-        }
         else if (args[0] == "[2]")
         {
             client[index].setGameStart(1);
             mini_game(client, index, 1);
         }
         else if (args[0] == "[3]")
-        {
-            client[index].setGameStart(0);
             sendToClient("Best Anime: Shingeri no Kyojin 👀\n", client[index].getSocket());
-        }
         else if (args[0] == "[4]")
-        {
-            client[index].setGameStart(0);
-            std::string msg = "Joke: Why do programmers prefer darkmode?\n";
-            msg += "Because light attracts bugs 😂\n";
-            sendToClient(msg, client[index].getSocket());
-        }
+            sendToClient("Joke: Why do programmers prefer darkmode?\nBecause light attracts bugs 😂\n", client[index].getSocket());
         else if (args[0] == "[5]")
-        {
-            client[index].setGameStart(0);
             sendToClient("byee, See you soon 😉\n", client[index].getSocket());
-        }
         else
             sendToClient("please enter the number of the command you want to execute(range 1~5)\n", client[index].getSocket());
         return;
