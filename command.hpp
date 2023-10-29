@@ -7,8 +7,6 @@
 #include <sstream>
 #include <algorithm>
 #include <netdb.h>
-// #include <ctime>
-// #include <cstdio>
 
 #include "mode_opt.hpp"
 #include "server.hpp"
@@ -28,8 +26,8 @@ enum Commands{
     KICK,
     INVITE,
     PONG,
+    BIMO,
     QUIT,
-    BOT,
 };
 
 class Channel;
@@ -83,12 +81,9 @@ public:
     void TOPICCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void KICKCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
     void QUITCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
+    void BIMOCommand(std::map<int, Client> &client, int index);
 
-
-    //void BOTCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels);
-    //int  get_ur_age(std::string &str);
+    void mini_game(std::map<int, Client> &client, int index, int x);
 };
-// int checkUsrNick(std::map<int, Client> &client, int check, std::string str, int index);
-// void check_channel(std::string channel, Client &client, std::map<int, Channel> &channels);
 
 #endif // COMMAND_HPP
