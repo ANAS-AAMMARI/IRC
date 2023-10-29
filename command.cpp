@@ -867,10 +867,10 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
             msg = "*";
         else
             msg = "+" + msg;
-        if (channels[id].getLimit() != 0)
-            msg += " " + std::to_string(channels[id].getLimit());
         if (channels[id].getEncrypted())
             msg += " " + channels[id].getPass();
+        if (channels[id].getLimit() != 0)
+            msg += " " + std::to_string(channels[id].getLimit());
         sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
         time_t timestamp = getCreationTime(channels[id].getCreation_time());
         std::ostringstream oss;
@@ -892,6 +892,8 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
+        if (check == 3)
+            return;
         if (size > 1)
         {
             check = 1;
@@ -913,12 +915,12 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         }
         if (args[1][j] == 'l')
         {
-            mode_l(args, channels[id], client[index], is_minus, count, msg, check);
+            mode_l(args, channels[id], client[index], is_minus, count, msg, check, j);
             continue;
         }
         if (args[1][j] == 'k')
         {
-            mode_k(args, channels[id], client[index], is_minus, count, msg, check);
+            mode_k(args, channels[id], client[index], is_minus, count, msg, check, j);
             continue;
         }
         if (args[1][j] == 'o')
@@ -928,7 +930,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
                 sendToClient(MODE_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
                 return;
             }
-            mode_o(args, channels[id], client[index], is_minus, count, msg, check);
+            mode_o(args, channels[id], client[index], is_minus, count, msg, check, j);
             continue;
         }
         if (args[1][j] == 't')
