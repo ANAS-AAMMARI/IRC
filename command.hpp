@@ -39,7 +39,6 @@ private:
     std::string command;
     int indexOfCommand;
     std::vector<std::string> args;
-    Channel *channel;
 public:
     static std::vector<std::string> listOfCommands;
     Command(std::string msg, std::map<int, Client> &client, int index);

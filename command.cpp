@@ -83,10 +83,6 @@ Command::Command(std::string msg, std::map<int, Client> &client, int index)
     this->msg = msg;
     this->command = "";
     this->indexOfCommand = -1;
-
-    // im not Sure about this line 
-    this->channel = NULL;
-
     this->parse(client[index]);
 }
 
@@ -98,7 +94,6 @@ Command &Command::operator=(const Command &other)
         this->command = other.command;
         this->indexOfCommand = other.indexOfCommand;
         this->args = other.args;
-        this->channel = other.channel;
     }
     return *this;
 }
@@ -188,8 +183,6 @@ void Command::removeSpaces(std::string &msg)
         temp = msg;
         index = msg.size();
     }
-    // std::cout<<"------temp = "<<temp<<std::endl;
-    //  trimString(temp);
     std::string result;
     bool previousIsSpace = false;
     for (size_t i = 0; i < temp.size(); i++)
@@ -283,7 +276,6 @@ std::string Command::getCurrentDateTime()
     return std::string(buf);
 }
 
-//tal man ba3d
 time_t getCreationTime(const std::string creation_time) {
     const char* dateString = creation_time.c_str();
     struct tm timeinfo;
@@ -966,7 +958,6 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
 
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
-    // std::cout << "Command : "<<std::endl;
     if (!client[index].getIsRegistered())
         this->registerClient(client, index, channel, server);
     else
