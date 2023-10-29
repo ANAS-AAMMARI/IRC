@@ -827,6 +827,15 @@ void Command::QUITCommand(std::map<int, Client> &client, int index, std::map<int
     }
 }
 
+std::string toString(int num)
+{
+    std::string result;
+    std::stringstream ss;
+    ss << num;
+    ss >> result;
+    return result;
+}
+
 // MODE Command ****************************************************************
 void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels)
 {
@@ -880,13 +889,11 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         if (channels[id].getEncrypted())
             msg += " " + channels[id].getPass();
         if (channels[id].getLimit() != 0)
-            msg += " " + std::to_string(channels[id].getLimit());
+            msg += " " + toString(channels[id].getLimit());
         if (!msg.empty())
             sendToClient(MODE_SUCCESS_MSG(client[index].getNick(), this->args[0], msg), client[index].getSocket());
         time_t timestamp = getCreationTime(channels[id].getCreation_time());
-        std::ostringstream oss;
-        oss << timestamp;
-        std::string str = oss.str();
+        std::string str = toString(timestamp);
         sendToClient(JOIN_CREATE_TIME_MSG(client[index].getNick(), this->args[0], str), client[index].getSocket());
         return;
     }
