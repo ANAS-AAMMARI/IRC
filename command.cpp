@@ -98,6 +98,7 @@ Command &Command::operator=(const Command &other)
         this->command = other.command;
         this->indexOfCommand = other.indexOfCommand;
         this->args = other.args;
+        this->channel = other.channel;
     }
     return *this;
 }

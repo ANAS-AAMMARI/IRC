@@ -6,6 +6,7 @@ Server::Server(long long port, std::string password)
 {
     this->setPort(port);
     this->password = password;
+    this->message = "";
 }
 
 Server &Server::operator=(const Server &other)
@@ -16,6 +17,8 @@ Server &Server::operator=(const Server &other)
         this->password = other.password;
         this->pollfds = other.pollfds;
         this->clients = other.clients;
+        this->channels = other.channels;
+        this->message = other.message;
     }
     return *this;
 }
@@ -180,9 +183,15 @@ void Server::handelClientMessage(int clientSocket)
     }
     else
     {
-        std::string message(buffer);
-        Command command(message, clients, clientSocket);
+        if (buffer[messageSize - 1] != '\n' && buffer[messageSize - 2] != '\r')
+        {
+            this->message += std::string(buffer);
+            return;
+        }
+        this->message += std::string(buffer);
+        Command command(this->message, clients, clientSocket);
         command.execute(clients, clientSocket, channels, *this);
+        this->message = "";
     }
 }
 

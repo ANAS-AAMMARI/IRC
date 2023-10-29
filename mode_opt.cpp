@@ -264,7 +264,7 @@ void mode_o(std::vector<std::string> &args, Channel &channel, Client client, boo
             count++;
             return;
         }
-        sendToclient(MODE_NOTONCHANNEL_MSG(client.getNick(), channel.getName()), client.getSocket());
+        sendToclient(MODE_USERNOTINCHANNEL_MSG(client.getNick(), args[1 + count], channel.getName()), client.getSocket());
         count++;
         return;
     }
@@ -313,7 +313,7 @@ void mode_o(std::vector<std::string> &args, Channel &channel, Client client, boo
             count++;
             return;
         }
-        sendToclient(MODE_NOTONCHANNEL_MSG(client.getNick(), channel.getName()), client.getSocket());
+        sendToclient(MODE_USERNOTINCHANNEL_MSG(client.getNick(), args[1 + count], channel.getName()), client.getSocket());
         count++;
         return;
     }

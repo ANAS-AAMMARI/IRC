@@ -24,6 +24,7 @@ class Server {
 private:
     long long port;
     std::string password;
+    std::string message;
     static const int BUFFER_SIZE;
     std::vector<struct pollfd> pollfds;
     std::map<int, Client> clients;

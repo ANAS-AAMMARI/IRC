@@ -79,6 +79,7 @@
 # define MODE_BADCHANMODE_MSG(nick, channel) ":ft_irc 471 " + nick + " " + channel + " :Bad mode in channel (+b)\r\n"
 # define MODE_SUCCESS_MSG(nick, channel, msg) ":ft_irc 324 " + nick + " " + channel + " " + msg + "\r\n"
 # define MODE_TIMEOUT_MSG(nick, channel, msg) ":ft_irc 329 " + nick + " " + channel + " " + msg + "\r\n"
+# define MODE_USERNOTINCHANNEL_MSG(user, nick, channel) ":ft_irc 441 " + user + " " + nick + " " + channel + " :They aren't on that channel\r\n"
 
 // error message TOPIC
 # define TOPIC_NOTREGISTERED_MSG(nick) ":ft_irc 451 " + nick + " :You have not registered\r\n"
