@@ -900,53 +900,33 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     }
     bool is_minus = false;
     size_t count = 1;
-    int check = 0;
     remove_duplicate(this->args[1]);
     removeOperators(this->args[1]);
     int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
-        if (check == 3 || check == 4)
-            return;
-        if (size > 1)
+        if (args[1][j] == '+' || args[1][j] == '-')
         {
-            check = 1;
-            if (j + 1 == size)
-                check = 2;
-        }
-        if (args[1][j] == '+' || args[1][j] == 'i')
-        {
-            if (args[1][j] == 'i')
-                mode_i(args,channels[id], client[index], is_minus, msg, check);
-            else
+            if (args[1][j] == '+')
                 is_minus = false;
-            continue;
+            else
+                is_minus = true;
         }
-        if (args[1][j] == '-')
+        else if (args[1][j] == 'i')
+            mode_i(channels[id], client[index], is_minus, msg);
+        else if (args[1][j] == 'l')
+            mode_l(args, channels[id], client[index], is_minus, count, msg);
+        else if (args[1][j] == 'k')
+            mode_k(args, channels[id], client[index], is_minus, count, msg);
+        else if (args[1][j] == 'o')
         {
-            is_minus = true;
-            continue;
+            if (!this->args[1 + count].empty() && checkNickUser(client, this->args[1 + count], 1) == -1)
+                sendToClient(KICK_USERNOTINCHANNEL_MSG(client[index].getNick(), this->args[1 + count], channels[id].getName()), client[index].getSocket());
+            else
+                mode_o(args, channels[id], client[index], is_minus, count, msg);
         }
-        if (args[1][j] == 'l')
-        {
-            mode_l(args, channels[id], client[index], is_minus, count, msg, check, j);
-            continue;
-        }
-        if (args[1][j] == 'k')
-        {
-            mode_k(args, channels[id], client[index], is_minus, count, msg, check, j);
-            continue;
-        }
-        if (args[1][j] == 'o')
-        {
-            mode_o(args, channels[id], client[index], is_minus, count, msg, check, j);
-            continue;
-        }
-        if (args[1][j] == 't')
-        {
-            mode_tp(args, channels[id], client[index], is_minus, msg, check);
-            continue;
-        }
+        else if (args[1][j] == 't')
+            mode_tp(channels[id], client[index], is_minus, msg);
         else
         {
             sendToClient(MODE_BADCHANMODE_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
@@ -954,7 +934,6 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         }
     }
 }
-
 void Command::execute(std::map<int, Client> &client, int index, std::map<int, Channel> &channel, Server &server)
 {
     if (!client[index].getIsRegistered())
