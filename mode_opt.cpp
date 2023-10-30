@@ -57,6 +57,8 @@ void mode_i(std::vector<std::string> &args, Channel &channel, Client client, boo
     {
         if (channel.getInv_mode() && check != 2)
             return;
+        if (channel.getInv_mode() && args[1].size() == 2 && args[1][0] == '+')
+            return;
         channel.setInv_mode(true);
         if (!check)
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+i"));
@@ -79,6 +81,8 @@ void mode_i(std::vector<std::string> &args, Channel &channel, Client client, boo
     if (is_munis)
     {
         if (!channel.getInv_mode() && check != 2)
+            return;
+        if (channel.getInv_mode() && args[1].size() == 2 && args[1][0] == '-')
             return;
         channel.setInv_mode(false);
         if (!check)
@@ -109,6 +113,8 @@ void mode_tp(std::vector<std::string> &args, Channel &channel, Client client, bo
     {
         if (channel.getTopicMode() && check != 2)
             return;
+        if (channel.getTopicMode() && args[1].size() == 2 && args[1][0] == '+')
+            return;
         channel.setTopicMode(true);
         if (!check)
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "+t"));
@@ -130,6 +136,8 @@ void mode_tp(std::vector<std::string> &args, Channel &channel, Client client, bo
     if (is_munis)
     {
         if (!channel.getTopicMode() && check != 2)
+            return;
+        if (channel.getTopicMode() && args[1].size() == 2 && args[1][0] == '-')
             return;
         channel.setTopicMode(false);
         if (!check)

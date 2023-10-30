@@ -1015,23 +1015,27 @@ void    Command::BIMOCommand(std::map<int, Client> &client, int index)
 {
     if (!client[index].getIsRegistered())
     {
-        sendToClient("you are not registered\n", client[index].getSocket());
+        sendToClient(ALREADY_MSG(client[index].getNick()), client[index].getSocket());
         return;
     }
     if (this->args.size() == 0)
     {
-        std::string msg = "Welcome to BIMO_Bot, i have the following commands: :)\n";
-        msg += "[1] - say Hi\n";
-        msg += "[2] - mini_game\n";
-        msg += "[3] - tell you best anime\n";
-        msg += "[4] - tell you a joke\n";
-        msg += "[5] - bye\n";
-        msg += "please enter the number of the command you want to execute (in this format, bot_name [number]):\n";
-        sendToClient(msg, client[index].getSocket());
+        std::string msg = "Hi, i'm bimo, i can do some stuff for you, for example :";
+        sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
+        sendToClient(MSG(client[index].getNick(), "[1] - say Hi"), client[index].getSocket());
+        sendToClient(MSG(client[index].getNick(), "[2] - mini_game"), client[index].getSocket());
+        sendToClient(MSG(client[index].getNick(), "[3] - tell you best anime"), client[index].getSocket());
+        sendToClient(MSG(client[index].getNick(), "[4] - tell you a joke"), client[index].getSocket());
+        sendToClient(MSG(client[index].getNick(), "[5] - say bye"), client[index].getSocket());
+        msg = "please enter the number of the command you want to execute (in this format, bot_name [number]):";
+        sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
         return;
     }
     if (this->args.size() > 1)
-        sendToClient("please enter the number of the command you want to execute (in this format, bimo [number]) : ", client[index].getSocket());
+    {
+        std::string msg = "please enter the number of the command you want to execute (in this format, bimo [number]) : ";
+        sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
+    }    
     else if (this->args.size() == 1)
     {
         if (client[index].getGameStart()){
@@ -1042,25 +1046,25 @@ void    Command::BIMOCommand(std::map<int, Client> &client, int index)
             }
             else
             {
-                std::string msg = "please enter number between 1~100, it is simple 👏, for example : bimo 23\n";
-                sendToClient(msg, client[index].getSocket());
+                std::string msg = "please enter number between 1~100, it is simple 👏, for example : bimo 23";
+                sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
             }
         }
         else if (args[0] == "[1]")
-                sendToClient("👋Hii '_', what do you expect me to say -_- lol :)\n", client[index].getSocket());
+                sendToClient(MSG(client[index].getNick(), ":👋Hii '_', what do you expect me to say -_- lol :)"), client[index].getSocket());
         else if (args[0] == "[2]")
         {
             client[index].setGameStart(1);
             mini_game(client, index, 1);
         }
         else if (args[0] == "[3]")
-            sendToClient("Best Anime: Shingeri no Kyojin 👀\n", client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "Best Anime: jujustu kaisen 🤩"), client[index].getSocket());
         else if (args[0] == "[4]")
-            sendToClient("Joke: Why do programmers prefer darkmode?\nBecause light attracts bugs 😂\n", client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "Joke: i have a joke about UDP, but you might not get it 😂"), client[index].getSocket());
         else if (args[0] == "[5]")
-            sendToClient("byee, See you soon 😉\n", client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "Bye: see you soon 🙏"), client[index].getSocket());
         else
-            sendToClient("please enter the number of the command you want to execute(range 1~5)\n", client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "please enter a valid command number, for example : bimo [1]"), client[index].getSocket());
         return;
     }
     return;
@@ -1070,17 +1074,17 @@ void    Command::mini_game(std::map<int, Client> &client, int index, int x)
 {
     if (x)
     {
-        std::string msg = "Welcome to this mini_game, the main idea is to guess a Number between 1~100, and see how many times you trying before get it 🔥\n";
+        std::string msg = "Welcome to this mini_game, the main idea is to guess a Number between 1~100, and see how many times you trying before get it 🔥";
         srand(time(NULL));
         client[index].setRandomNumber(rand() % 100 + 1);
         client[index].setTryed(0);
         client[index].setguess_number(0);
-        sendToClient(msg, client[index].getSocket());
+        sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
     }
     else
     {
         if (!client[index].getguess_number())
-            sendToClient("why entre 0? is not between 0~100, i think im already say that,Entre just Numbers between 1~100 🤔: \n", client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "why entre 0? is not between 0~100, i think im already say that,Entre just Numbers between 1~100 🤔:"), client[index].getSocket());
         else if (client[index].getguess_number() == client[index].getRandomNumber())
         {
             client[index].increaseTryed();
@@ -1090,31 +1094,29 @@ void    Command::mini_game(std::map<int, Client> &client, int index, int x)
             ss2 <<client[index].getguess_number(); 
             std::string result = ss.str();
             std::string result2 = ss2.str();
-            std::string msg = "✅you guessed it in " + result + " tryes, the number was "+ result2+ "🎉\n";
-            msg += "i hope you enjoyed the game 🙏, see you soon :)\n";
-            sendToClient(msg, client[index].getSocket());
+            std::string msg = "✅you guessed it in " + result + " tryes, the number was "+ result2+ "🎉";
+            sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
+            msg = "i hope you enjoyed the game 🙏, see you soon :)";
+            sendToClient(MSG(client[index].getNick(), msg), client[index].getSocket());
             client[index].setGameStart(0);
             client[index].setguess_number(-1);
             client[index].setTryed(0);
         }
-        else if (client[index].getguess_number() > client[index].getRandomNumber())
-        {
-            client[index].increaseTryed();
-            std::string msg = "Too high 📈, try again :\n";
-            sendToClient(msg, client[index].getSocket());
-        }
         else if (client[index].getguess_number() > 100)
         {
             client[index].increaseTryed();
-            std::string msg = "TOO HIGH❌\n";
-            msg += "please enter a number between 1~100 : \n";
-            sendToClient(msg, client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "TOO HIGH❌"), client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "please enter a number between 1~100 : "), client[index].getSocket());
+        }
+        else if (client[index].getguess_number() > client[index].getRandomNumber())
+        {
+            client[index].increaseTryed();
+            sendToClient(MSG(client[index].getNick(), "Too high 📈, try again :"), client[index].getSocket());
         }
         else
         {
             client[index].increaseTryed();
-            std::string msg = "Too low 📉, try again :\n";
-            sendToClient(msg, client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "Too low 📉, try again :"), client[index].getSocket());
         }
     }
 }

@@ -8,6 +8,9 @@
 # define MYINFO_MSG(nick, userModes, chanModes) ":ft_irc 004 " + nick + " ft_irc 1.0 " + userModes + " " + chanModes + "\r\n"
 # define ISUPPORT_MSG(client, tokens) (":ft_irc 005 " + client + " " + tokens " :are available on this server\r\n")
 
+// msg
+# define MSG(nick, msg) ":ft_irc 001 " + nick + " :" + msg + "\r\n"
+
 // error message pass and command
 # define UNKNOW_COMMAND_MSG(nick, command) ":ft_irc 421 " + nick + " " + command + " :Unknown command\r\n"
 # define REQUIRED_MSG(nick, command) (":ft_irc 461 " + nick + " " + command + " :Not enough parameters\r\n")
@@ -94,5 +97,6 @@
 // error message QUIT
 # define QUIT_MSG(nick, user, ip) ":" + nick + "!~" + user + "@" + ip + " QUIT :Client Quit\r\n"
 # define QUIT_ERROR_MSG(ip) "ERROR :Closing Link: " + ip + " (Client Quit)\r\n"
+
 
 #endif // TOOL_HPP
