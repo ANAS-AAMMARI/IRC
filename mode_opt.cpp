@@ -82,7 +82,7 @@ void mode_i(std::vector<std::string> &args, Channel &channel, Client client, boo
     {
         if (!channel.getInv_mode() && check != 2)
             return;
-        if (channel.getInv_mode() && args[1].size() == 2 && args[1][0] == '-')
+        if (!channel.getInv_mode() && args[1].size() == 2 && args[1][0] == '-')
             return;
         channel.setInv_mode(false);
         if (!check)
@@ -137,7 +137,7 @@ void mode_tp(std::vector<std::string> &args, Channel &channel, Client client, bo
     {
         if (!channel.getTopicMode() && check != 2)
             return;
-        if (channel.getTopicMode() && args[1].size() == 2 && args[1][0] == '-')
+        if (!channel.getTopicMode() && args[1].size() == 2 && args[1][0] == '-')
             return;
         channel.setTopicMode(false);
         if (!check)
@@ -204,6 +204,10 @@ void mode_k(std::vector<std::string> &args, Channel &channel, Client client, boo
     }
     if (is_munis)
     {
+        if (!channel.getEncrypted() && check != 2)
+            return;
+        if (!channel.getEncrypted() && args[1].size() == 2 && args[1][0] == '-')
+            return;
         channel.setPass("");
         channel.setEncrypted(false);
         if (!check)
@@ -267,9 +271,6 @@ void mode_o(std::vector<std::string> &args, Channel &channel, Client client, boo
             count++;
             return;
         }
-        sendToclient(MODE_USERNOTINCHANNEL_MSG(client.getNick(), args[1 + count], channel.getName()), client.getSocket());
-        count++;
-        return;
     }
     if (is_munis)
     {
@@ -277,7 +278,7 @@ void mode_o(std::vector<std::string> &args, Channel &channel, Client client, boo
             return;
         if (args[1 + count].empty() && (check || check == 2))
             check = 3;
-        if (channel.checkAdmin(args[1 + count]) != -1 || check == 3)
+        if (channel.checkNick(args[1 + count]) != -1 || check == 3)
         {
             if (check != 3)
                 channel.removeoperator(args[1 + count]);
@@ -305,20 +306,11 @@ void mode_o(std::vector<std::string> &args, Channel &channel, Client client, boo
                     temp += " " + args[i++];
                 channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), temp));
             }
-                count++;
-                if (check != 3)
-                    removeCharacter(msg, 'o');
-                return;
-        }
-        if (channel.checkNick(args[1 + count]) != -1)
-        {
-            sendToclient(MODE_CHANOPRIVSNEEDED_MSG(client.getNick(), channel.getName()), client.getSocket());
             count++;
+            if (check != 3)
+                removeCharacter(msg, 'o');
             return;
         }
-        sendToclient(MODE_USERNOTINCHANNEL_MSG(client.getNick(), args[1 + count], channel.getName()), client.getSocket());
-        count++;
-        return;
     }
 }
 
@@ -362,6 +354,10 @@ void mode_l(std::vector<std::string> &args, Channel &channel, Client client, boo
     }
     if (is_munis)
     {
+        if (!channel.getLimit() && check != 2)
+            return;
+        if (!channel.getLimit() && args[1].size() == 2 && args[1][0] == '-')
+            return;
         channel.setLimit(0);
         if (!check)
             channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-l"));

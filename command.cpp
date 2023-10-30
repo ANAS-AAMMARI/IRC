@@ -891,8 +891,8 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     }
     if (channels[id].checkAdmin(client[index].getNick()) == -1)
     {
-            sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-            return;
+        sendToClient(MODE_CHANOPRIVSNEEDED_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
+        return;
     }
     bool is_minus = false;
     size_t count = 1;
@@ -937,8 +937,9 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         {
             if (checkNickUser(client, this->args[1 + count], 1) == -1)
             {
-                sendToClient(MODE_NOTONCHANNEL_MSG(client[index].getNick(), this->args[0]), client[index].getSocket());
-                return;
+                sendToClient(MODE_USERNOTINCHANNEL_MSG(client[index].getNick(), this->args[1 + count], this->args[0]), client[index].getSocket());
+                count++;
+                continue;
             }
             mode_o(args, channels[id], client[index], is_minus, count, msg, check, j);
             continue;
@@ -1058,9 +1059,9 @@ void    Command::BIMOCommand(std::map<int, Client> &client, int index)
             mini_game(client, index, 1);
         }
         else if (args[0] == "[3]")
-            sendToClient(MSG(client[index].getNick(), "Best Anime: jujustu kaisen 🤩"), client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "Best Anime: shingeki no kyojin 🤩"), client[index].getSocket());
         else if (args[0] == "[4]")
-            sendToClient(MSG(client[index].getNick(), "Joke: i have a joke about UDP, but you might not get it 😂"), client[index].getSocket());
+            sendToClient(MSG(client[index].getNick(), "Joke: Why do programmers prefer darkmode, Because light attracts bugs 😂"), client[index].getSocket());
         else if (args[0] == "[5]")
             sendToClient(MSG(client[index].getNick(), "Bye: see you soon 🙏"), client[index].getSocket());
         else
