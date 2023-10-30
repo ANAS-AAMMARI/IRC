@@ -20,9 +20,10 @@ private:
     std::string password;
     bool isRegistered;
     bool isValidPass;
+    std::string ip;
 public:
     Client();
-    Client(int socket, std::string password);
+    Client(int socket, std::string password, std::string);
     Client(std::string nick, std::string user, int socket, std::string password);
     Client& operator=(const Client& other);
     Client(const Client& other);
@@ -41,6 +42,8 @@ public:
     void setPassword(std::string password);
     void setIsRegistered(bool isRegistered);
     void setIsValidPass(bool isValidPass);
+    void setIp(std::string ip);
+    std::string getIp();
 
     void setGameStart(int game_start);
     void setTryed(int tryed);

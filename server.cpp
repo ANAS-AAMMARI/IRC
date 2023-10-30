@@ -161,9 +161,12 @@ void Server::handleNewConnection()
     pollfds.push_back(clientPollfd);
 
     // Add client to clients
-    Client newClient(clientSocket, this->password);
+    char ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(clientAddress.sin_addr), ip, INET_ADDRSTRLEN);
+    Client newClient(clientSocket, this->password, ip);
+    newClient.setIp(ip);
     clients[clientSocket] = newClient;
-
+    
     // Send welcome message
     std::cout << "client with socket number " << clientSocket << " connected" << std::endl;
 }

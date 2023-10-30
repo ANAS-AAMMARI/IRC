@@ -62,7 +62,7 @@ public:
     void toUpper(std::string &str);
     void sendToClient(const std::string &msg, int clientSocket);
     std::string getCurrentDateTime();
-    std::string getLoclalIp();
+    // std::string getLoclalIp();
     std::string getHostName();
     void registerClient(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);
     void commandHandler(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server);

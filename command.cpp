@@ -137,28 +137,28 @@ void Command::setIndexOfCommand(int index)
     this->indexOfCommand = index;
 }
 
-std::string Command::getLoclalIp()
-{
-    char hostname[1024];
-    if (gethostname(hostname, sizeof(hostname)) != 0)
-    {
-        return "NULL";
-    }
+// std::string Command::getLoclalIp()
+// {
+//     char hostname[1024];
+//     if (gethostname(hostname, sizeof(hostname)) != 0)
+//     {
+//         return "NULL";
+//     }
 
-    struct hostent *host = gethostbyname(hostname);
-    if (host == NULL)
-    {
-        return "NULL";
-    }
+//     struct hostent *host = gethostbyname(hostname);
+//     if (host == NULL)
+//     {
+//         return "NULL";
+//     }
 
-    char *ipAddress = inet_ntoa(*(struct in_addr *)host->h_addr);
-    if (ipAddress == NULL)
-    {
-        return "NULL";
-    }
+//     char *ipAddress = inet_ntoa(*(struct in_addr *)host->h_addr);
+//     if (ipAddress == NULL)
+//     {
+//         return "NULL";
+//     }
 
-    return std::string(ipAddress);
-}
+//     return std::string(ipAddress);
+// }
 
 void Command::trimString(std::string &str)
 {
@@ -364,8 +364,8 @@ void Command::registerClient(std::map<int, Client> &client, int index, std::map<
     if (client[index].getNick().empty() || client[index].getUser().empty())
         return;  
     client[index].setIsRegistered(true);
-    sendToClient(WELCOME_MSG(client[index].getNick(), getLoclalIp(), client[index].getUser()), client[index].getSocket());
-    sendToClient(YOURHOST_MSG(client[index].getNick(), getLoclalIp()), client[index].getSocket());
+    sendToClient(WELCOME_MSG(client[index].getNick(), client[index].getIp(), client[index].getUser()), client[index].getSocket());
+    sendToClient(YOURHOST_MSG(client[index].getNick(), client[index].getIp()), client[index].getSocket());
     sendToClient(CREATED_MSG(client[index].getNick(), getCurrentDateTime()), client[index].getSocket());
     sendToClient(MYINFO_MSG(client[index].getNick(), "+", "t"), client[index].getSocket());
     sendToClient(ISUPPORT_MSG(client[index].getNick(), "PREFIX=(ov)@+ CHANTYPES=#&+ CHANMODES=,,,"), client[index].getSocket());
@@ -426,7 +426,7 @@ void Command::NICKCommand(std::map<int, Client> &client, int index)
     std::string oldNick = client[index].getNick();
     client[index].setNick(this->args[0]);
     if (client[index].getIsRegistered())
-        sendToClient(NICK_MSG(oldNick, client[index].getNick(), client[index].getUser(), getLoclalIp()), client[index].getSocket());
+        sendToClient(NICK_MSG(oldNick, client[index].getNick(), client[index].getUser(), client[index].getIp()), client[index].getSocket());
 }
 
 // USER Command ***********************************************************
@@ -493,7 +493,9 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
                     sendToClient(PRIVMSG_CANNOTSENDTOCHAN_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
                     return;
                 }
-                channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[index].getNick());
+                
+                std::cout << PRIVMSG_AWAY_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), recipients[i], this->args[1]) << std::endl;
+                channel[id].sendToAllButOne(PRIVMSG_AWAY_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), recipients[i], this->args[1]), client[index].getNick());
             }
             else
                 sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
@@ -502,9 +504,11 @@ void Command::PRIVMSGCommand(std::map<int, Client> &client, int index, std::map<
         {
             int id = checkNickUser(client, recipients[i], 1);
             if (id != -1)
+            {
                 sendToClient(PRIVMSG_AWAY_MSG(client[index].getNick(),
-                                              client[index].getUser(), getLoclalIp(), recipients[i], this->args[1]),
-                             client[id].getSocket());
+                                                client[index].getUser(), client[index].getIp(), recipients[i], this->args[1]),
+                                client[id].getSocket());
+            }    
             else
                 sendToClient(PRIVMSG_NOSUCHNICK_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
@@ -568,7 +572,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
                 continue;
             }
             channels[id].addClient(client[index]);
-            channels[id].sendToAll(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]));
+            channels[id].sendToAll(JOIN_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), recipients[i]));
             sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[id].getClients()), client[index].getSocket());
             sendToClient(JOIN_ENDOFNAMES_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
@@ -578,7 +582,7 @@ void Command::JOINCommand(std::map<int, Client> &client, int index, std::map<int
             newChannel.setCreation_time(getCurrentDateTime());
             channels[channels.size()] = newChannel;
             channels[channels.size() - 1].addAdmin(client[index]);
-            sendToClient(JOIN_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), recipients[i]), client[index].getSocket());
+            sendToClient(JOIN_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), recipients[i]), client[index].getSocket());
             sendToClient(JOIN_NAMREPLY_MSG(client[index].getNick(), recipients[i], channels[channels.size() - 1].getClients()), client[index].getSocket());
             sendToClient(JOIN_ENDOFNAMES_MSG(client[index].getNick(), recipients[i]), client[index].getSocket());
         }
@@ -631,7 +635,7 @@ void Command::INVITECommand(std::map<int, Client> &client, int index, std::map<i
         return;
     }
     channels[id2].addInvited(client[id].getNick());
-    sendToClient(INVITE_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], this->args[1]), client[id].getSocket());
+    sendToClient(INVITE_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), this->args[0], this->args[1]), client[id].getSocket());
     sendToClient(INVITE_SUCCESS_MSG(client[index].getNick(), this->args[0], this->args[1]), client[index].getSocket());
 }
 
@@ -680,7 +684,7 @@ void Command::KICKCommand(std::map<int, Client> &client, int index, std::map<int
         sendToClient(KICK_USERNOTINCHANNEL_MSG(client[index].getNick(), this->args[1], this->args[0]), client[index].getSocket());
         return;
     }
-    channels[id].sendToAll(KICK_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[1], this->args[0]));
+    channels[id].sendToAll(KICK_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), this->args[1], this->args[0]));
     channels[id].removeClient(this->args[1]);
     if (channels[id].getNumberOfClients() == 0)
         channels.erase(id);
@@ -724,7 +728,7 @@ void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int
             sendToClient(PART_NOTONCHANNEL_MSG(client[index].getNick(), channelsName[i]), client[index].getSocket());
             continue;
         }
-        channels[id].sendToAll(PART_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), channelsName[i]));
+        channels[id].sendToAll(PART_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), channelsName[i]));
         channels[id].removeClient(client[index].getNick());
         if (channels[id].getNumberOfClients() == 0)
             channels.erase(id);
@@ -768,14 +772,14 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
         if (this->args[1].empty())
         {
             channels[id].setTopic(":");
-            channels[id].sendToAll(TOPIC_SET_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], channels[id].getTopic()));
+            channels[id].sendToAll(TOPIC_SET_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), this->args[0], channels[id].getTopic()));
             return;
         }
         std::string msg = "";
         for (size_t i = 1; i < this->args.size(); i++)
             msg += this->args[i] + " ";
         channels[id].setTopic(msg);
-        channels[id].sendToAll(TOPIC_SET_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[0], channels[id].getTopic()));
+        channels[id].sendToAll(TOPIC_SET_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp(), this->args[0], channels[id].getTopic()));
     }
     else
     {
@@ -799,16 +803,16 @@ void Command::TOPICCommand(std::map<int, Client> &client, int index, std::map<in
 // QUIT Command ****************************************************************
 void Command::QUITCommand(std::map<int, Client> &client, int index, std::map<int, Channel> &channels, Server &server)
 {
-    sendToClient(QUIT_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp()), client[index].getSocket());
+    sendToClient(QUIT_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp()), client[index].getSocket());
     for (std::map<int, Channel>::iterator it = channels.begin(); it != channels.end(); it++)
     {
         if (it->second.checkNick(client[index].getNick()) != -1)
         {
             it->second.removeClient(client[index].getNick());
-            it->second.sendToAll(QUIT_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp()));
+            it->second.sendToAll(QUIT_MSG(client[index].getNick(), client[index].getUser(), client[index].getIp()));
         }
     }
-    sendToClient(QUIT_ERROR_MSG(this->getLoclalIp()), client[index].getSocket());
+    sendToClient(QUIT_ERROR_MSG(client[index].getIp()), client[index].getSocket());
     std::cout << "Client with socket number " << client[index].getSocket() << " disconnected" << std::endl;
     close(client[index].getSocket());
     client.erase(client[index].getSocket());
