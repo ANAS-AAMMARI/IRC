@@ -921,7 +921,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         else if (args[1][j] == 'o')
         {
             if (!this->args[1 + count].empty() && checkNickUser(client, this->args[1 + count], 1) == -1)
-                sendToClient(KICK_USERNOTINCHANNEL_MSG(client[index].getNick(), this->args[1 + count], channels[id].getName()), client[index].getSocket());
+                sendToClient(MODE_NOSUCHNICK_MSG(client[index].getNick(), this->args[1 + count]), client[index].getSocket());
             else
                 mode_o(args, channels[id], client[index], is_minus, count, msg);
         }

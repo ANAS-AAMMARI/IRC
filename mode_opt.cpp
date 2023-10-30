@@ -108,6 +108,8 @@ void mode_k(std::vector<std::string> &args, Channel &channel, Client client, boo
     }
     if (is_munis)
     {
+        if (channel.getPass().empty() || !channel.getEncrypted())
+            return;
         channel.setPass("");
         channel.setEncrypted(false);
         channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-k " + "*"));
@@ -175,6 +177,8 @@ void mode_l(std::vector<std::string> &args, Channel &channel, Client client, boo
     }
     if (is_munis)
     {
+        if (channel.getLimit() == 0)
+            return;
         channel.setLimit(0);
         channel.sendToAll(MODE_MSG(client.getNick(), client.getUser(), getLocalIP(), channel.getName(), "-l " + "*"));
         removeCharacter(msg, 'l');
