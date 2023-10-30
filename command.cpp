@@ -682,6 +682,8 @@ void Command::KICKCommand(std::map<int, Client> &client, int index, std::map<int
     }
     channels[id].sendToAll(KICK_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), this->args[1], this->args[0]));
     channels[id].removeClient(this->args[1]);
+    if (channels[id].getNumberOfClients() == 0)
+        channels.erase(id);
 }
 
 // PART Command ****************************************************************
@@ -724,6 +726,8 @@ void Command::PARTCommand(std::map<int, Client> &client, int index, std::map<int
         }
         channels[id].sendToAll(PART_MSG(client[index].getNick(), client[index].getUser(), getLoclalIp(), channelsName[i]));
         channels[id].removeClient(client[index].getNick());
+        if (channels[id].getNumberOfClients() == 0)
+            channels.erase(id);
     }
 }
 
@@ -902,7 +906,7 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
     int size = this->args[1].size();
     for (int j = 0; j < size; j++)
     {
-        if (check == 3)
+        if (check == 3 || check == 4)
             return;
         if (size > 1)
         {
@@ -935,12 +939,6 @@ void Command::MODECommand(std::map<int, Client> &client, int index, std::map<int
         }
         if (args[1][j] == 'o')
         {
-            if (checkNickUser(client, this->args[1 + count], 1) == -1)
-            {
-                sendToClient(MODE_USERNOTINCHANNEL_MSG(client[index].getNick(), this->args[1 + count], this->args[0]), client[index].getSocket());
-                count++;
-                continue;
-            }
             mode_o(args, channels[id], client[index], is_minus, count, msg, check, j);
             continue;
         }
