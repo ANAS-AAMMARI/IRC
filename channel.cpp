@@ -25,6 +25,9 @@ Channel::Channel(std::string name) {
 }
 
 Channel& Channel::operator=(const Channel& other) {
+
+    if (this == &other)
+        return *this;
     this->topic = other.topic;
     this->name = other.name;
     this->pass_of_channel = other.pass_of_channel;

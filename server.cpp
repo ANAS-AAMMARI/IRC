@@ -164,7 +164,6 @@ void Server::handleNewConnection()
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(clientAddress.sin_addr), ip, INET_ADDRSTRLEN);
     Client newClient(clientSocket, this->password, ip);
-    newClient.setIp(ip);
     clients[clientSocket] = newClient;
     
     // Send welcome message

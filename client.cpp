@@ -1,6 +1,6 @@
 #include "client.hpp"
 
-Client::Client() : ip("") {
+Client::Client(){
     this->nick = "";
     this->user = "";
     this->socket = -1;
@@ -11,6 +11,7 @@ Client::Client() : ip("") {
     this->tryed = -1;
     this->guess_number = -1;
     this->game_start = 0;
+    this->ip = "";
 }
 
 Client::Client(int socket, std::string password, std::string ip) : ip(ip) {
@@ -37,6 +38,7 @@ Client::Client(std::string nick, std::string user, int socket, std::string passw
     this->tryed = 0;
     this->guess_number = -1;
     this->game_start = 0;
+    this->ip = "";
 }
 
 Client& Client::operator=(const Client& other) {
